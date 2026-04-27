@@ -1,0 +1,259 @@
+---
+title: "Core Towny objects: Resident, Town, Nation"
+description: "Reference for the main Towny data objects — Resident, Town, Nation, TownBlock, and TownyWorld — including key methods and typical usage patterns."
+---
+
+Towny models the world through five main data objects. Every object inherits from `TownyObject`, which provides `getName()`, `getUUID()`, `save()`, and metadata access. All objects are loaded from the database when the server starts and kept in memory by `TownyUniverse` for fast lookup.
+
+<Note>
+Methods that may return `null` are annotated `@Nullable` in the source. Methods ending in `OrNull` (e.g., `getTownOrNull()`) are the safe null-returning variants; methods without that suffix throw a checked `NotRegisteredException` instead.
+</Note>
+
+---
+
+## Resident
+
+A `Resident` corresponds to a player who has logged in to a Towny-enabled server at least once. It stores the player's town membership, friends list, rank, jail status, and persistent metadata.
+
+**Class:** `com.palmergames.bukkit.towny.object.Resident`
+
+### Key methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getName()` | `String` | The player's last-known username. |
+| `getUUID()` | `UUID` | The player's unique identifier. |
+| `hasTown()` | `boolean` | `true` if the resident belongs to a town. |
+| `getTownOrNull()` | `@Nullable Town` | The resident's town, or `null`. Use after `hasTown()`. |
+| `getTown()` | `Town` | The resident's town; throws `NotRegisteredException` if none. |
+| `hasNation()` | `boolean` | `true` if the resident's town is in a nation. |
+| `getNationOrNull()` | `@Nullable Nation` | The resident's nation, or `null`. |
+| `isMayor()` | `boolean` | `true` if this resident is the mayor of their town. |
+| `isKing()` | `boolean` | `true` if this resident is the king (capital mayor) of their nation. |
+| `isNPC()` | `boolean` | `true` if this resident is a Citizens/Trait NPC, not a real player. |
+| `isJailed()` | `boolean` | `true` if the resident is currently in jail. |
+| `getLastOnline()` | `long` | Unix timestamp (ms) of the last time the player was online. |
+| `getRegistered()` | `long` | Unix timestamp (ms) of when the resident was first registered. |
+| `getFriends()` | `List<Resident>` | The resident's friend list. |
+| `hasFriend(Resident resident)` | `boolean` | Whether the given resident is on the friend list. |
+| `getTownRanks()` | `List<String>` | Town ranks held by this resident (e.g. `"assistant"`). |
+| `getNationRanks()` | `List<String>` | Nation ranks held by this resident. |
+| `hasTownRank(String rank)` | `boolean` | Whether the resident holds the named town rank. |
+| `hasNationRank(String rank)` | `boolean` | Whether the resident holds the named nation rank. |
+| `getTitle()` | `String` | Custom title prefix, or `""`. |
+| `getSurname()` | `String` | Custom surname suffix, or `""`. |
+| `getAbout()` | `@NotNull String` | The resident's about/description text. |
+| `getAccount()` | `Account` | The resident's economy account (if an economy plugin is present). |
+| `getMetaData()` | `Collection<CustomDataField<?>>` | All metadata attached to this resident. |
+
+### Usage example
+
+```java
+Resident resident = TownyAPI.getInstance().getResident(player);
+if (resident == null) return;
+
+if (resident.hasTown()) {
+    Town town = resident.getTownOrNull();
+    player.sendMessage("Town: " + town.getName());
+
+    if (resident.isMayor()) {
+        player.sendMessage("You are the mayor!");
+    }
+}
+
+long daysSinceOnline = (System.currentTimeMillis() - resident.getLastOnline())
+    / (1000 * 60 * 60 * 24);
+player.sendMessage("Last seen " + daysSinceOnline + " days ago.");
+```
+
+---
+
+## Town
+
+A `Town` is a group of residents who collectively own a set of claimed `TownBlock`s. It may optionally belong to a `Nation`. Towns extend `Government`, which provides shared economy, permission, and spawn functionality.
+
+**Class:** `com.palmergames.bukkit.towny.object.Town`
+
+### Key methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getName()` | `String` | The town's display name. |
+| `getUUID()` | `UUID` | The town's unique identifier. |
+| `getMayor()` | `Resident` | The current mayor. |
+| `getResidents()` | `List<Resident>` | All residents (unmodifiable view). |
+| `getNumResidents()` | `int` | Count of residents. |
+| `hasResident(Resident resident)` | `boolean` | Whether the resident belongs to this town. |
+| `hasResident(String name)` | `boolean` | Whether a resident with this name belongs to the town. |
+| `getTownBlocks()` | `Collection<TownBlock>` | All claimed `TownBlock`s (unmodifiable). |
+| `getNumTownBlocks()` | `int` | Number of claimed town blocks. |
+| `hasNation()` | `boolean` | `true` if the town is part of a nation. |
+| `getNationOrNull()` | `@Nullable Nation` | The town's nation, or `null`. |
+| `getNation()` | `Nation` | The nation; throws `NotRegisteredException` if none. |
+| `isPublic()` | `boolean` | Whether the town's spawn is publicly accessible. |
+| `isOpen()` | `boolean` | Whether players can join without an invite. |
+| `isNeutral()` | `boolean` | Whether the town has declared neutrality. |
+| `isCapital()` | `boolean` | `true` if this town is the capital of its nation. |
+| `isRuined()` | `boolean` | `true` if the town is in a ruined state. |
+| `getSpawnOrNull()` | `@Nullable Location` | The town's spawn location, or `null` if unset. |
+| `getHomeBlock()` | `TownBlock` | The homeblock of the town; throws if unset. |
+| `hasHomeBlock()` | `boolean` | Whether a homeblock has been set. |
+| `getAccount()` | `Account` | The town's economy bank account. |
+| `getTaxes()` | `double` | The town's tax amount. |
+| `isTaxPercentage()` | `boolean` | Whether the tax is a percentage. |
+| `getFounder()` | `String` | Name of the town's founder. |
+| `getWorld()` | `TownyWorld` | The `TownyWorld` this town's homeblock is in. |
+| `getAllies()` | `Map<UUID, Town>` | Town-level allies (distinct from nation-level allies). |
+| `getEnemies()` | `Map<UUID, Town>` | Town-level enemies. |
+| `getMetaData()` | `Collection<CustomDataField<?>>` | All metadata attached to this town. |
+
+### Usage example
+
+```java
+Town town = TownyAPI.getInstance().getTown("Springfield");
+if (town == null) return;
+
+Resident mayor = town.getMayor();
+System.out.println("Mayor: " + mayor.getName());
+System.out.println("Residents: " + town.getNumResidents());
+System.out.println("Blocks claimed: " + town.getNumTownBlocks());
+
+if (town.hasNation()) {
+    System.out.println("Nation: " + town.getNationOrNull().getName());
+}
+```
+
+---
+
+## Nation
+
+A `Nation` groups multiple towns under a king (the mayor of the capital town). Nations can form alliances, declare enemies, and share a common spawn point.
+
+**Class:** `com.palmergames.bukkit.towny.object.Nation`
+
+### Key methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getName()` | `String` | The nation's display name. |
+| `getUUID()` | `UUID` | The nation's unique identifier. |
+| `getCapital()` | `Town` | The capital town (the king's town). |
+| `hasCapital()` | `boolean` | Whether a capital has been set. |
+| `isKing(Resident resident)` | `boolean` | Whether the given resident is the king. |
+| `getTowns()` | `List<Town>` | All member towns (unmodifiable). |
+| `getNumTowns()` | `int` | Count of member towns. |
+| `getNumResidents()` | `int` | Total residents across all member towns. |
+| `hasResident(Resident resident)` | `boolean` | Whether the resident is in any of the nation's towns. |
+| `getAllies()` | `List<Nation>` | Nations with which this nation has an alliance. |
+| `hasAlly(Nation nation)` | `boolean` | Whether the two nations are allied. |
+| `hasMutualAlly(Nation nation)` | `boolean` | `true` only if both nations have each other in their ally lists. |
+| `getEnemies()` | `List<Nation>` | Nations declared as enemies. |
+| `hasEnemy(Nation nation)` | `boolean` | Whether the two nations are enemies. |
+| `getMutualAllies()` | `List<Nation>` | Allied nations that also list this nation as an ally. |
+| `isNeutral()` | `boolean` | Whether the nation has declared neutrality. |
+| `getSpawnOrNull()` | `@Nullable Location` | The nation's spawn location, or `null`. |
+| `getAccount()` | `Account` | The nation's economy bank account. |
+| `getTaxes()` | `double` | The tax charged to member towns. |
+| `isTaxPercentage()` | `boolean` | Whether the tax is a percentage. |
+| `getAssistants()` | `List<Resident>` | Residents with the `assistant` nation rank. |
+| `getMetaData()` | `Collection<CustomDataField<?>>` | All metadata attached to this nation. |
+
+### Usage example
+
+```java
+Nation nation = TownyAPI.getInstance().getNation("Rome");
+if (nation == null) return;
+
+System.out.println("Capital: " + nation.getCapital().getName());
+System.out.println("Towns: " + nation.getNumTowns());
+System.out.println("Total residents: " + nation.getNumResidents());
+
+for (Nation ally : nation.getMutualAllies()) {
+    System.out.println("Ally: " + ally.getName());
+}
+```
+
+---
+
+## TownBlock
+
+A `TownBlock` is a single Minecraft chunk that has been claimed by a town. It tracks the plot type, whether it is for sale, and who personally owns it (if anyone has claimed it with `/plot claim`).
+
+**Class:** `com.palmergames.bukkit.towny.object.TownBlock`
+
+### Key methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getTownOrNull()` | `@Nullable Town` | The town that owns this block, or `null`. |
+| `hasTown()` | `boolean` | Whether this block is claimed by a town. |
+| `getResidentOrNull()` | `@Nullable Resident` | The resident who personally owns this plot, or `null`. |
+| `hasResident()` | `boolean` | Whether a resident has personally claimed this plot. |
+| `getWorldCoord()` | `WorldCoord` | The chunk coordinate of this block. |
+| `getType()` | `TownBlockType` | The plot type (e.g., `RESIDENTIAL`, `SHOP`, `ARENA`). |
+| `isForSale()` | `boolean` | Whether the plot is listed for purchase. |
+| `getPlotPrice()` | `double` | The sale price, or `-1` if not for sale. |
+| `isTaxed()` | `boolean` | Whether this plot incurs taxes. |
+| `isOutpost()` | `boolean` | Whether this block is an outpost. |
+| `getPermissions()` | `TownyPermission` | The plot-level permission settings. |
+| `getX()` | `int` | The chunk X coordinate. |
+| `getZ()` | `int` | The chunk Z coordinate. |
+| `getWorld()` | `TownyWorld` | The world this block is in. |
+| `getClaimedAt()` | `long` | Unix timestamp (ms) when this block was claimed. |
+| `getMetaData()` | `Collection<CustomDataField<?>>` | All metadata attached to this block. |
+
+### Usage example
+
+```java
+TownBlock block = TownyAPI.getInstance().getTownBlock(player.getLocation());
+if (block == null) {
+    player.sendMessage("Wilderness");
+    return;
+}
+
+Town town = block.getTownOrNull();
+player.sendMessage("Town: " + (town != null ? town.getName() : "unknown"));
+player.sendMessage("Type: " + block.getType().getName());
+
+if (block.hasResident()) {
+    player.sendMessage("Plot owner: " + block.getResidentOrNull().getName());
+}
+```
+
+---
+
+## TownyWorld
+
+`TownyWorld` is Towny's wrapper around a Bukkit `World`. It stores per-world Towny settings such as whether Towny is active, whether new claims are allowed, and wilderness/mob rules.
+
+**Class:** `com.palmergames.bukkit.towny.object.TownyWorld`
+
+### Key methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getName()` | `String` | The Bukkit world name. |
+| `getUUID()` | `UUID` | The world UUID. |
+| `isUsingTowny()` | `boolean` | Whether Towny land management is active in this world. |
+| `isClaimable()` | `boolean` | Whether new town claims are permitted. |
+| `isWarAllowed()` | `boolean` | Whether war can take place in this world. |
+| `isPVP()` | `boolean` | The world-level default PVP setting. |
+| `isForcePVP()` | `boolean` | Whether PVP is forced regardless of town settings. |
+| `isFire()` | `boolean` | Whether fire spread is permitted. |
+| `hasWildernessMobs()` | `boolean` | Whether monsters can spawn in wilderness. |
+| `isForceTownMobs()` | `boolean` | Whether mob spawning is forced inside towns. |
+| `isJailing()` | `boolean` | Whether jailing is enabled in this world. |
+
+### Usage example
+
+```java
+TownyWorld townyWorld = TownyAPI.getInstance().getTownyWorld(player.getWorld());
+if (townyWorld == null || !townyWorld.isUsingTowny()) {
+    player.sendMessage("Towny is not active in this world.");
+    return;
+}
+
+if (!townyWorld.isClaimable()) {
+    player.sendMessage("Land cannot be claimed in this world.");
+}
+```

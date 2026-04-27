@@ -1,0 +1,138 @@
+---
+title: "Nations: diplomacy and multi-town alliances"
+description: "Nations group multiple towns under a King, enabling shared diplomacy, a collective bank, nation-wide taxes, ally and enemy relationships, and a nation zone buffer."
+---
+
+A **Nation** is a group of towns that have agreed to operate under a shared government. At the top of the Towny hierarchy sits the **King** — the mayor of the nation's capital town. Nations enable diplomacy between groups of players, shared economy, and optional war mechanics.
+
+## The King role
+
+The King is not a separate account. The King is simply the current mayor of the **capital town**. Whoever holds the mayorship of the capital automatically holds the King title.
+
+```bash
+# Transfer the capital (and therefore the kingship) to another town
+/nation set capital <town>
+```
+
+If the capital's mayor changes (through succession or a `/town mayor` transfer), the King changes automatically. The King has full control over nation settings: bank, taxes, allies, enemies, ranks, and member towns.
+
+## How towns join and leave nations
+
+Towns join by accepting an invitation from the King (or an assistant with the appropriate rank). A town that leaves a nation loses any nation-derived permissions and is removed from the nation's territory.
+
+```bash
+# King invites a town
+/nation invite <town>
+
+# Mayor of an invited town accepts
+/nation join <nation>
+
+# Mayor withdraws their town from the nation
+/nation leave
+```
+
+<Note>
+When the last town leaves (or is kicked from) a nation, the nation is automatically deleted.
+</Note>
+
+## Allies and enemies
+
+Nations can declare other nations as **allies** or **enemies**. These relationships affect combat rules and, if war is enabled on the server, determine valid war targets.
+
+```bash
+# Request an alliance
+/nation ally add <nation>
+/nation ally remove <nation>
+
+# Declare an enemy
+/nation enemy add <nation>
+/nation enemy remove <nation>
+```
+
+An alliance is **mutual** only when both nations have added each other. One-sided ally declarations exist (stored in each nation's ally list) but do not confer all mutual-ally benefits until the other side also adds the ally.
+
+| Relationship | Effect |
+|---|---|
+| Mutual ally | Residents of allied towns may be exempt from PvP rules and can access ally-restricted spawns |
+| Enemy | Flags the nation as a hostile target; may enable PvP between residents in war-enabled servers |
+
+## Nation bank and taxes
+
+Every nation has a bank account that pays for upkeep and funds nation-level actions.
+
+```bash
+/nation deposit <amount>
+/nation withdraw <amount>
+/nation bankhistory
+```
+
+The King sets a **nation tax** collected from each member town at the configured tax interval. Taxes can be set as a flat amount or a percentage of each town's bank balance.
+
+```bash
+/nation set taxes <amount>
+/nation toggle taxpercent
+```
+
+<Note>
+Town mayors see the nation tax deducted from their town bank, not from individual residents.
+</Note>
+
+## Nation zone
+
+A **nation zone** is a buffer of chunks surrounding each member town's claimed TownBlocks. Outsiders (players not belonging to the nation or its allies) are subject to special restrictions inside this buffer zone, even though the chunks are not formally claimed by any town.
+
+The size of the nation zone grows with the nation's **nation level** (determined by resident count or number of towns, depending on server configuration). It can also be overridden per-town by the mayor.
+
+```bash
+# Town mayor can opt their town out of the nation zone
+/town toggle nationzone
+```
+
+## Nation spawn
+
+A nation can set a shared spawn point accessible to all its residents and optionally to allied nations and the public.
+
+```bash
+# Set the nation spawn at your current location
+/nation set spawn
+
+# Teleport to the nation spawn
+/nation spawn
+```
+
+<Note>
+By default, the nation spawn must be located inside the capital town's claimed territory. Server administrators can change this in the configuration.
+</Note>
+
+## Nation ranks
+
+The King can assign ranks to residents of any member town. Ranks grant permissions defined in `townyperms.yml`. The built-in nation rank is `assistant`, but servers can define additional custom ranks.
+
+```bash
+/nation rank add <resident> <rank>
+/nation rank remove <resident> <rank>
+/nation ranklist
+```
+
+Nation ranks apply nation-wide — a resident with the `assistant` nation rank can perform assistant-level actions in any town belonging to the nation, subject to the server's `townyperms.yml` settings.
+
+## Nation neutrality
+
+A nation can declare itself **neutral**, opting its member towns out of war participation. Neutral nations typically pay an additional upkeep premium configured by the server administrator.
+
+```bash
+/nation toggle neutral
+```
+
+<Tip>
+Neutrality only applies to war mechanics. Neutral nations can still declare allies and enemies; those relationships just do not trigger war participation.
+</Tip>
+
+## Nation levels
+
+As a nation grows (by gaining towns or residents), it advances through **nation levels** defined by the server. Each level can increase the nation zone buffer size, the maximum number of ally nations, the bonus blocks granted to member towns, and other configurable attributes.
+
+```bash
+# See the nation's current level and stats
+/nation
+```

@@ -1,0 +1,241 @@
+---
+title: "Plot command reference (/plot) — types, perms, groups"
+description: "Full reference for /plot — claim and sell plots, set plot types, manage permissions, create plot groups and districts, and configure individual plot toggles."
+---
+
+The `/plot` command controls everything related to individual TownBlocks (plots). Residents use it to claim and personalise plots they own, while mayors use it to manage unowned town land. Plot types, permission flags, groups, and districts are all configured here.
+
+<Note>
+You must be standing inside the plot you want to modify. Most subcommands require you to be either the plot owner or the town mayor. Permission nodes follow the pattern `towny.command.plot.<subcommand>`.
+</Note>
+
+## Subcommand overview
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/plot claim` | Claim the plot you are standing in. | `towny.command.plot.claim` |
+| `/plot unclaim` | Release your claim on the current plot. | `towny.command.plot.unclaim` |
+| `/plot forsale <price>` | Put the current plot up for sale. | `towny.command.plot.forsale` |
+| `/plot fs <price>` | Alias for `/plot forsale`. | `towny.command.plot.forsale` |
+| `/plot notforsale` | Remove the current plot from sale. | `towny.command.plot.notforsale` |
+| `/plot nfs` | Alias for `/plot notforsale`. | `towny.command.plot.notforsale` |
+| `/plot evict` | Remove the current plot's owner (mayor only). | `towny.command.plot.evict` |
+| `/plot info` | Show details about the current plot. | *(any player)* |
+| `/plot perm` | Display the current plot's permission flags. | `towny.command.plot.perm.*` |
+| `/plot perm hud` | Toggle the permissions HUD overlay. | `towny.command.plot.perm.hud` |
+| `/plot perm gui` | Open the permissions GUI editor. | `towny.command.plot.perm.gui` |
+| `/plot perm add <type> <player\|group>` | Add a permission entry to the plot. | `towny.command.plot.perm.add` |
+| `/plot perm remove <type> <player\|group>` | Remove a permission entry from the plot. | `towny.command.plot.perm.remove` |
+| `/plot set reset` | Reset the plot to default town settings. | `towny.command.plot.set.reset` |
+| `/plot set name <name>` | Give the plot a custom name. | `towny.command.plot.set.name` |
+| `/plot set perm <flags>` | Set plot-level permission flags. | `towny.command.plot.set.perm` |
+| `/plot set arena` | Change the plot type to Arena. | `towny.command.plot.set.arena` |
+| `/plot set bank` | Change the plot type to Bank. | `towny.command.plot.set.bank` |
+| `/plot set embassy` | Change the plot type to Embassy. | `towny.command.plot.set.embassy` |
+| `/plot set farm` | Change the plot type to Farm. | `towny.command.plot.set.farm` |
+| `/plot set inn` | Change the plot type to Inn. | `towny.command.plot.set.inn` |
+| `/plot set jail` | Change the plot type to Jail. | `towny.command.plot.set.jail` |
+| `/plot set shop` | Change the plot type to Shop. | `towny.command.plot.set.shop` |
+| `/plot set spleef` | Change the plot type to Spleef. | `towny.command.plot.set.spleef` |
+| `/plot set wilds` | Change the plot type to Wilds. | `towny.command.plot.set.wilds` |
+| `/plot set outpost` | Change the plot type to Outpost. | *(mayor)* |
+| `/plot set minjoindays <n>` | Set minimum days before a resident can claim. | *(mayor)* |
+| `/plot set maxjoindays <n>` | Set maximum days a resident can be in town. | *(mayor)* |
+| `/plot toggle explosion` | Toggle explosions on the current plot. | `towny.command.plot.toggle.explosion` |
+| `/plot toggle fire` | Toggle fire spread on the current plot. | `towny.command.plot.toggle.fire` |
+| `/plot toggle mobs` | Toggle mob spawning on the current plot. | `towny.command.plot.toggle.mobs` |
+| `/plot toggle pvp` | Toggle PvP on the current plot. | `towny.command.plot.toggle.pvp` |
+| `/plot toggle taxed` | Toggle whether the plot is subject to taxes. | *(mayor)* |
+| `/plot group add <name>` | Add the current plot to a named group (or create it). | `towny.command.plot.group.add` |
+| `/plot group remove` | Remove the current plot from its group. | `towny.command.plot.group.remove` |
+| `/plot group delete <name>` | Delete an entire plot group. | `towny.command.plot.group.delete` |
+| `/plot group rename <name> <new>` | Rename a plot group. | `towny.command.plot.group.rename` |
+| `/plot group set <type>` | Set the type for all plots in the group. | `towny.command.plot.group.set` |
+| `/plot group toggle <flag>` | Toggle a flag for all plots in the group. | `towny.command.plot.group.toggle` |
+| `/plot group forsale <price>` | Put all group plots up for sale. | `towny.command.plot.group.forsale` |
+| `/plot group notforsale` | Remove all group plots from sale. | `towny.command.plot.group.notforsale` |
+| `/plot group perm <flags>` | Set permissions for all plots in the group. | `towny.command.plot.group.perm` |
+| `/plot group trust add <player>` | Add a trusted player to all group plots. | `towny.command.plot.group.trust` |
+| `/plot group trust remove <player>` | Remove a trusted player from all group plots. | `towny.command.plot.group.trust` |
+| `/plot district add <name>` | Add the current plot to a named district (or create it). | `towny.command.plot.district.add` |
+| `/plot district remove` | Remove the current plot from its district. | `towny.command.plot.district.remove` |
+| `/plot district delete <name>` | Delete a district. | `towny.command.plot.district.delete` |
+| `/plot district rename <name> <new>` | Rename a district. | `towny.command.plot.district.rename` |
+| `/plot trust add <player>` | Grant a player trusted access to the current plot. | `towny.command.plot.trust` |
+| `/plot trust remove <player>` | Remove trusted access from a player. | `towny.command.plot.trust` |
+| `/plot clear` | Clear all blocks from the plot (regenerate). | `towny.command.plot.clear` |
+| `/plot jailcell add` | Mark the current plot as a jail cell. | `towny.command.plot.jailcell` |
+| `/plot jailcell remove` | Remove the jail cell designation. | `towny.command.plot.jailcell` |
+
+---
+
+## Claiming and releasing plots
+
+```bash
+# Claim the plot under your feet
+/plot claim
+
+# Release your ownership of the plot
+/plot unclaim
+```
+
+<Tip>
+Use `/plot claim` when standing on a for-sale plot to purchase it at the listed price. If the plot is unowned, it costs the town's default plot price.
+</Tip>
+
+---
+
+## Selling plots
+
+```bash
+# List the current plot for 100
+/plot forsale 100
+
+# Take it off the market
+/plot notforsale
+
+# Mayor: evict the current resident from their plot
+/plot evict
+```
+
+---
+
+## Plot permissions
+
+Towny uses a permission matrix: rows are resident types (`resident`, `nation`, `ally`, `outsider`) and columns are action types (`build`, `destroy`, `switch`, `item_use`).
+
+```bash
+# Open the permissions HUD overlay
+/plot perm hud
+
+# Open the GUI editor
+/plot perm gui
+
+# Grant build access to a friend
+/plot perm add build Steve
+
+# Remove switch access from outsiders
+/plot perm remove switch outsider
+
+# Set permissions via shorthand flags
+/plot set perm resident build on
+```
+
+---
+
+## Plot types
+
+Setting a plot type changes the rules and taxes that apply to it. Only the mayor or plot owner with appropriate permission can change types.
+
+<AccordionGroup>
+  <Accordion title="Available plot types">
+
+| Type | Description |
+|---|---|
+| Default | Standard town plot with normal permissions. |
+| Arena | PvP is always enabled; death penalties may be waived. |
+| Bank | Used by economy add-ons for banking. |
+| Embassy | Can be purchased by non-residents for a separate price. |
+| Farm | Restricts building to farm-related blocks. |
+| Inn | Allows any player to use a bed and set a spawn. |
+| Jail | Cells used to hold jailed residents. |
+| Shop | Taxed at the shop rate; used for player shops. |
+| Spleef | Designated spleef arena plot. |
+| Wilds | Plot behaves like the wilderness (unprotected). |
+
+  </Accordion>
+</AccordionGroup>
+
+```bash
+# Convert to an embassy (purchasable by outsiders)
+/plot set embassy
+
+# Convert to a farm
+/plot set farm
+
+# Convert to a shop
+/plot set shop
+
+# Reset back to a normal town plot
+/plot set reset
+```
+
+---
+
+## Plot toggles
+
+Toggles override town-level defaults for a single plot.
+
+```bash
+# Allow explosions on this plot only
+/plot toggle explosion on
+
+# Disable PvP on this plot
+/plot toggle pvp off
+
+# Prevent fire from spreading
+/plot toggle fire off
+
+# Disable hostile mob spawning
+/plot toggle mobs off
+```
+
+---
+
+## Plot groups
+
+Plot groups let you manage multiple plots as a single unit.
+
+```bash
+# Add the current plot to a group named "market"
+/plot group add market
+
+# Set the type for all "market" plots at once
+/plot group set shop
+
+# List all for-sale at price 200
+/plot group forsale 200
+
+# Remove all from sale
+/plot group notforsale
+
+# Remove this plot from its group
+/plot group remove
+
+# Delete the entire group
+/plot group delete market
+```
+
+---
+
+## Districts
+
+Districts are named zones within a town — useful for organising neighbourhoods or themed areas.
+
+```bash
+# Add the current plot to the "harbour" district
+/plot district add harbour
+
+# Remove this plot from its district
+/plot district remove
+
+# Rename the district
+/plot district rename harbour docks
+
+# Delete the district
+/plot district delete docks
+```
+
+---
+
+## Trusted players
+
+Trusted players get full build/destroy/switch/item-use access to the plot regardless of standard permission flags.
+
+```bash
+# Trust Steve on the current plot
+/plot trust add Steve
+
+# Remove Steve's trusted access
+/plot trust remove Steve
+```

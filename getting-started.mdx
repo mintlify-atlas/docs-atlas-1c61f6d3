@@ -1,0 +1,125 @@
+---
+title: "Get started with Towny: your first town"
+description: "Walk through becoming a resident, founding your first town, claiming land, setting a home block, and inviting friends to join you."
+---
+
+This page walks you through the essential first steps every new player takes in Towny: registering as a resident, founding a town, claiming your first chunk of land, and growing your community. You do not need any special permissions beyond the defaults — every command here is available to regular players.
+
+## Before you begin
+
+Make sure Towny is installed and the world you are playing in has Towny enabled. Ask your server administrator if you are unsure.
+
+## Your first steps
+
+<Steps>
+  <Step title="Check your resident profile">
+    When you first join a Towny server, you are automatically registered as a **Resident**. Run the resident command to see your profile:
+
+    ```bash
+    /res
+    ```
+
+    This shows your resident status, the town you belong to (if any), friends, and personal settings. If you see your name and stats, Towny is active and your account is registered.
+  </Step>
+
+  <Step title="Create a town">
+    Stand in the chunk of land where you want your town's home block to be, then run:
+
+    ```bash
+    /town new <name>
+    ```
+
+    Replace `<name>` with your town's name. For example:
+
+    ```bash
+    /town new Riverdale
+    ```
+
+    You become the **Mayor** of the new town. Your current chunk is automatically claimed as the first TownBlock.
+
+    <Note>
+    Creating a town may cost in-game currency if your server has economy enabled. Run `/towny prices` to check the current costs before you create your town.
+    </Note>
+  </Step>
+
+  <Step title="Claim your first plot">
+    Expand your town by claiming the chunk you are standing in:
+
+    ```bash
+    /town claim
+    ```
+
+    Each claim costs one TownBlock from your town's available allotment. The number of TownBlocks available grows with the number of residents in your town. Run `/town` to see how many blocks you have left.
+  </Step>
+
+  <Step title="Set your home block">
+    The home block is the heart of your town and the default spawn point. Stand in the chunk you want as your home block and run:
+
+    ```bash
+    /town set homeblock
+    ```
+
+    Then set the exact spawn point within that chunk:
+
+    ```bash
+    /town set spawn
+    ```
+
+    Residents will teleport here when they use `/town spawn`.
+  </Step>
+
+  <Step title="Invite a friend">
+    Send a town invitation to another player:
+
+    ```bash
+    /town invite <player>
+    ```
+
+    The invited player will see a prompt in chat. They accept by running:
+
+    ```bash
+    /town invite accept
+    ```
+
+    Or they can decline with `/town invite deny`. Once they join, they become a Resident of your town and can build in any plot you assign to them.
+  </Step>
+
+  <Step title="Join a nation (optional)">
+    Once your town is established, you may want to join a **Nation** for diplomacy and shared benefits. If a nation king invites your town, accept with:
+
+    ```bash
+    /nation join <nation>
+    ```
+
+    You can also wait for a nation to have an open invitation policy and join directly. Run `/nation list` to see available nations.
+  </Step>
+</Steps>
+
+## Key beginner tips
+
+<Tip>
+- Run `/town ?` or `/res ?` at any time to see a full list of available subcommands.
+- Use `/towny map` to see a text-based map of nearby TownBlocks and their owners.
+- Players without a town get the `towny.townless` permission group by default — useful for giving new players limited wilderness access before they settle down.
+- Your town's home block chunk is always claimed when you create the town. Do not unclaim it, or you will lose your spawn point.
+- Running `/town` without any arguments shows a summary of your own town: residents, bank balance, plots claimed, and current settings.
+</Tip>
+
+## Next steps
+
+Now that your town is up and running, explore these pages to go further:
+
+<CardGroup cols={2}>
+  <Card title="Town commands" icon="city" href="/commands/town">
+    Full reference for every `/town` subcommand, including taxes, ranks, toggles, and outposts.
+  </Card>
+  <Card title="Resident commands" icon="user" href="/commands/resident">
+    Manage your resident profile, friends, plot permissions, and personal toggles.
+  </Card>
+  <Card title="Nation commands" icon="flag" href="/commands/nation">
+    Create or manage a nation, set diplomacy, and invite member towns.
+  </Card>
+  <Card title="Plot commands" icon="map" href="/commands/plot">
+    Claim, sell, and configure individual plots within your town.
+  </Card>
+</CardGroup>

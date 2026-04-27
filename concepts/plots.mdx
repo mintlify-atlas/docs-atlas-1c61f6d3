@@ -1,0 +1,137 @@
+---
+title: "Plot types and permissions in Towny"
+description: "A Towny plot is one claimed chunk with its own type and permission set. Plot types change build rules and tax rates; permissions control build, destroy, switch, and item-use."
+---
+
+A **plot** (also called a **TownBlock**) is a single Minecraft chunk claimed by a town. Every plot belongs to the town by default, but the town can put it up for sale so a resident — or even a member of another town — can take personal ownership. Each plot has a **type** that changes its rules, a price, and a fine-grained permission set.
+
+## Plot types
+
+The type of a plot determines which blocks can be placed or broken, which tax rate applies, and what special mechanics are active. The mayor or an assistant sets the type with `/plot set <type>` while standing in the chunk.
+
+```bash
+/plot set default
+/plot set shop
+/plot set embassy
+/plot set arena
+/plot set wilds
+/plot set inn
+/plot set jail
+/plot set farm
+/plot set bank
+```
+
+| Type | Internal name | Description |
+|---|---|---|
+| **Default** (Residential) | `default` | Standard plot. Applies the town's base plot tax. Build/break permissions follow the town and plot permission settings. |
+| **Shop** (Commercial) | `shop` | Commercial plot. Applies the base plot tax **plus** a separate commercial plot tax on top. |
+| **Embassy** | `embassy` | Allows residents of **other towns** to purchase and own the plot. Applies the base plot tax plus an embassy tax. |
+| **Arena** | `arena` | PvP is **always enabled** inside arena plots, regardless of town toggle settings. |
+| **Wilds** | `wilds` | Restricts placeable/breakable blocks to the server's configured wilderness-allowed block list. Useful for nature reserves or mining zones. |
+| **Inn** | `inn` | Allows players to set their respawn point using a bed even when the server's `deny_bed_use` setting is active. |
+| **Jail** | `jail` | Designates the plot as a jail location and allows setting a jail spawn point used by Towny's jailing system. |
+| **Farm** | `farm` | Restricts placeable/breakable blocks to the server's configured farm block list, making it easy to allow crop harvesting while protecting everything else. |
+| **Bank** | `bank` | When this feature is enabled in the server config, players can deposit into the town or nation bank from within a bank plot. |
+
+<Note>
+The exact block lists for Wilds and Farm plot types are configured in the Towny world configuration, not in the plot type itself.
+</Note>
+
+## Plot ownership and buying
+
+By default, every plot is owned by the town. The mayor can list individual plots for sale, letting residents claim personal ownership.
+
+<Steps>
+  <Step title="Mayor lists the plot for sale">
+    Stand in the chunk and run:
+    ```bash
+    /plot forsale <price>
+    # or set it to free
+    /plot forsale 0
+    ```
+  </Step>
+  <Step title="Resident buys the plot">
+    Stand in the plot and run:
+    ```bash
+    /plot claim
+    ```
+    The plot price is deducted from the resident's balance and deposited into the town bank.
+  </Step>
+  <Step title="Resident returns the plot to the town">
+    ```bash
+    /plot unclaim
+    ```
+    The plot reverts to town ownership and is no longer for sale.
+  </Step>
+</Steps>
+
+Embassy plots follow the same flow, but players from **any** town (not just the owning town) can purchase them.
+
+<Warning>
+When a resident leaves or is kicked from a town, all non-embassy plots they personally owned are automatically returned to the town and relisted at the town's default plot price.
+</Warning>
+
+## Plot permissions
+
+Each plot has its own permission set that controls four actions — **build**, **destroy**, **switch** (interact with doors, levers, buttons), and **item use** (use items on blocks) — for four groups: **residents**, **outsiders**, **nation members**, and **allies**.
+
+```bash
+# View the current plot permissions
+/plot perm
+
+# Toggle a specific permission
+/plot set perm <group> <action> on|off
+# Example: allow outsiders to switch (use doors/buttons)
+/plot set perm outsider switch on
+
+# Reset plot permissions to match the town defaults
+/plot set perm reset
+
+# Add a specific resident as trusted on this plot
+/plot trust add <resident>
+/plot trust remove <resident>
+```
+
+Plot-level permissions override town-level permissions. If a town disables build for outsiders but a specific plot enables it, outsiders can build on that specific plot.
+
+The owner of a personally-claimed plot can also use their **personal resident toggles** (explosion, fire, mobs, pvp) to further customize their plot. See [Residents](/concepts/residents) for details.
+
+## Plot groups
+
+Multiple contiguous (or non-contiguous) plots can be organized into a **plot group**. Plot groups let the mayor manage permissions, pricing, and type for all member plots at once.
+
+```bash
+# Create or add the current plot to a group
+/plot group add <groupname>
+
+# Set plot type for all plots in the group
+/plot group set <type>
+
+# Put all plots in the group up for sale
+/plot group forsale <price>
+
+# Remove the current plot from its group
+/plot group remove
+```
+
+<Tip>
+Enable `plotgroup` mode with `/res toggle plotgroup` to automatically add newly claimed plots to the current group without running `/plot group add` each time.
+</Tip>
+
+## Districts
+
+**Districts** are a named grouping of plots within a town, similar to plot groups but intended for organizational or display purposes rather than bulk permission management. A district appears in plot information and can be used by third-party plugins or the map overlay.
+
+```bash
+# Assign the current plot to a district (creates it if new)
+/plot district add <districtname>
+
+# Remove the current plot from its district
+/plot district remove
+```
+
+Enable `district` mode with `/res toggle district` to automatically assign newly claimed plots to the active district:
+
+```bash
+/res toggle district
+```

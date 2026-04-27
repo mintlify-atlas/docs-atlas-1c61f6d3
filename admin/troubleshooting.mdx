@@ -1,0 +1,163 @@
+---
+title: "Troubleshooting common Towny issues"
+description: "Diagnose and fix the most frequent Towny problems: land protection failures, economy errors, SQL connection issues, permission denials, and startup failures."
+---
+
+This page covers the most common issues server administrators encounter with Towny. Work through the relevant accordion below, then check the debug log and the GitHub issue tracker if you are still stuck.
+
+## Common issues
+
+<AccordionGroup>
+  <Accordion title="Towny doesn't protect my land">
+    **Symptoms:** Players can break or place blocks inside claimed town plots without permission.
+
+    **Check these in order:**
+
+    1. **Confirm the world has Towny enabled.**
+       Run `/tw` while standing in the world (or `/tw <worldname>` from console) and look for `Using Towny: true`. If it is `false`, run:
+       ```
+       /tw toggle usingtowny on
+       ```
+
+    2. **Confirm the plot is actually claimed.**
+       Stand on the block in question and run `/town here` or `/plot`. If the chunk is unclaimed wilderness, Towny intentionally does not protect it by default.
+
+    3. **Check wilderness permissions.**
+       If the world has `/tw set wildperm build destroy` set, all players can build in the wilderness. Adjust with:
+       ```
+       /tw set wildperm
+       ```
+       (no arguments removes all wilderness build permissions)
+
+    4. **Check if the player has a bypass node.**
+       Players with `towny.claimed.*` or `towny.admin` can build anywhere. Review their permissions in LuckPerms.
+
+    5. **Check `townyperms.yml`.**
+       The `outsider` build permission in `townyperms.yml` controls what non-residents can do in town-owned plots. Make sure `build` is not set to `true` for outsiders.
+  </Accordion>
+
+  <Accordion title="Players can't create a town">
+    **Symptoms:** `/town new <name>` fails with an error message.
+
+    **Common causes:**
+
+    - **No economy plugin / Vault not installed.** Towny requires a Vault-compatible economy if `price_town_creation` is greater than `0` in `config.yml`. Install Vault and a compatible economy plugin (e.g. EssentialsX Economy, iConomy).
+    - **The player does not have the permission node.** The node `towny.command.town.new` must be granted. Check `townyperms.yml` under the `default` group — it should include `towny.command.town.new`.
+    - **The world is not claimable.** Ensure `/tw toggle claimable on` for the world the player is standing in.
+    - **Town creation is restricted to admins.** If `town_creation_admin_only` is `true` in `config.yml`, only players with `towny.admin` can create towns.
+    - **The player is already in a town.** A resident must leave their current town before founding a new one.
+  </Accordion>
+
+  <Accordion title="Taxes aren't running">
+    **Symptoms:** Town upkeep, taxes, and the new-day cycle are not triggering.
+
+    **Check these:**
+
+    1. **Verify the new-day time setting.**
+       In `config.yml`, find `new_day_time`. This is the server time (in hours, 24-hour format) at which the new-day event fires. Make sure the server is actually reaching that time each day.
+
+    2. **Confirm economy is working.**
+       Run `/ta eco info` to see the economy status. If economy is not hooked, no money will be transferred and upkeep will silently fail.
+
+    3. **Trigger a manual new day.**
+       You can force the new-day event with:
+       ```
+       /ta newday
+       ```
+       Watch the console for errors. If you see exceptions, they will indicate the root cause.
+
+    4. **Check for `0` upkeep.**
+       If `town_upkeep_cost` (and nation upkeep) are `0` in `config.yml`, taxes are effectively disabled. This is correct behavior, not a bug.
+  </Accordion>
+
+  <Accordion title="SQL connection errors on startup">
+    **Symptoms:** Towny fails to load with errors like `HikariPool — Exception during pool initialization` or `Communications link failure`.
+
+    **Steps to diagnose:**
+
+    1. Confirm your database server is running and accessible from the Minecraft server host.
+    2. Test the credentials by logging in manually:
+       ```bash
+       mysql -h localhost -u towny_user -p towny
+       ```
+    3. Ensure the database and table prefix exist. On first run Towny creates its own tables, so the database must exist but can be empty.
+    4. Check the JDBC flags in `database.yml`. If your MySQL server requires SSL, change `useSSL=false` to `useSSL=true` and supply a certificate or set `verifyServerCertificate=false`.
+    5. If you see `Unknown database driver`, confirm your server's Java version includes the MySQL JDBC driver or that the driver jar is on the classpath.
+
+    <Note>
+    Towny bundles HikariCP but does **not** bundle a MySQL driver. Paper ships a MariaDB/MySQL driver; if you use a server jar that does not, you must add the driver manually.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Towny is consuming excessive memory">
+    **Symptoms:** The server's heap grows steadily, or you see out-of-memory errors shortly after startup.
+
+    **Common causes:**
+
+    - **Large FlatFile dataset.** Towny loads the entire dataset into memory at startup. On servers with tens of thousands of residents or town blocks, this is expected. Consider switching to the SQL backend to reduce startup time (data is still cached in memory during operation).
+    - **Revert-on-unclaim snapshots.** Each snapshot stores a full chunk of block data. On busy servers with many unclaim events, this can accumulate. Review whether `revertunclaim` needs to be on for every world.
+    - **Server tick lag.** Async tasks in Towny that queue up due to server lag can hold references and prevent garbage collection. Check your server's TPS with `/tps` (Paper) and resolve any tick-rate issues first.
+    - **Outdated Towny version.** Memory leaks discovered in older releases are regularly fixed. Update to the latest release for your Minecraft version.
+  </Accordion>
+
+  <Accordion title="Commands not working / permission denied">
+    **Symptoms:** Players receive "You don't have permission to do that" on standard Towny commands.
+
+    **Checklist:**
+
+    1. **Check `townyperms.yml`.**
+       Towny has its own permission layer managed by `plugins/Towny/settings/townyperms.yml`. The groups `default`, `mayor`, `king`, etc. each contain a list of permission nodes. Make sure the needed node is present in the correct group.
+
+    2. **Check LuckPerms / your permission plugin.**
+       Nodes granted via `townyperms.yml` work alongside your permission plugin. If a node is negated (`-towny.command.town.new: false`) in LuckPerms it will override the Towny default.
+
+    3. **Reload permissions after editing.**
+       After editing `townyperms.yml`, run:
+       ```
+       /ta reload
+       ```
+
+    4. **Check the permission node spelling.**
+       All Towny permission nodes are listed in `plugin.yml` and on the [Permissions](/config/permissions) page. A common mistake is using `towny.command.town.*` when the player only needs one subcommand.
+  </Accordion>
+
+  <Accordion title="Error on startup: Towny disabled / locked in safe mode">
+    **Symptoms:** The console shows `Towny is in safe mode` and the plugin does not function. Players see "Locked in Safe mode!" when running commands.
+
+    **Most common causes:**
+
+    - **Wrong server platform.** Since version **0.102.0.0**, Towny requires **Paper**, **Purpur**, or **Folia**. Spigot and CraftBukkit are not supported. Migrate your server to Paper.
+    - **Corrupted data file.** Towny enters safe mode when it cannot parse a data file. Look for `[SEVERE]` lines immediately before the safe-mode message in the startup log. The file path is usually printed. Fix or remove the offending file and restart.
+    - **Incompatible Towny version.** Ensure you are using the Towny version that matches your Minecraft version (see the version table in the [introduction](/introduction)).
+    - **Missing `database.yml`.** If the settings folder is absent or unreadable, Towny cannot initialise. Check file permissions on `plugins/Towny/settings/`.
+  </Accordion>
+</AccordionGroup>
+
+## Enabling debug mode
+
+Debug mode logs detailed information about every protection check, event, and data operation Towny performs. This is the fastest way to trace an unexpected behavior.
+
+```
+/ta toggle debug
+```
+
+Requires `towny.command.townyadmin.toggle.debug`. Toggle it off again after diagnosis to avoid log flooding.
+
+## Finding the logs
+
+Towny writes all output (including debug output) to the standard server log:
+
+- **Paper/Purpur:** `logs/latest.log`
+- **Console output:** everything prefixed `[Towny]`
+
+On startup, look for `[SEVERE]` or `[WARNING]` lines from Towny for the most actionable information.
+
+## Reporting a bug
+
+Before filing a report:
+
+1. Reproduce the issue on the **latest release** of Towny for your Minecraft version.
+2. Collect the full startup log (not just a snippet) and any stack traces.
+3. Note your server platform (Paper/Folia/Purpur), Minecraft version, Towny version, and any relevant add-on plugins.
+
+File bug reports at the [GitHub issue tracker](https://github.com/TownyAdvanced/Towny/issues/new?assignees=&labels=&template=bug_report.md&title=). General questions can be posted in the [Q&A discussions](https://github.com/TownyAdvanced/Towny/discussions/new?category=Q-A) or on the [Discord server](https://discord.gg/gnpVs5m).

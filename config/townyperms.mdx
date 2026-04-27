@@ -1,0 +1,273 @@
+---
+title: "townyperms.yml: configuring rank permissions"
+description: "How townyperms.yml works, what sections it contains, how town and nation ranks inherit permissions, and how to add custom ranks with example syntax."
+---
+
+`townyperms.yml` is the file that defines which Bukkit permission nodes Towny itself grants to players based on their current **Towny rank** — nomad, resident, mayor, king, or any custom rank you create. It runs in addition to, not instead of, your permission plugin (LuckPerms, GroupManager, etc.).
+
+The file lives at:
+
+```
+plugins/Towny/settings/townyperms.yml
+```
+
+After editing it, reload with:
+
+```bash
+/ta reload
+```
+
+## How it differs from plugin.yml permissions
+
+Your permission plugin manages nodes permanently assigned to groups or players. `townyperms.yml` manages nodes that Towny grants **dynamically** based on what the player's Towny status is at any given moment:
+
+- A player in no town has only the `nomad` permissions.
+- A player who joins a town also gains the `towns.default` permissions.
+- A player who becomes mayor also gains the `towns.mayor` permissions.
+- A player whose town joins a nation also gains the `nations.default` permissions.
+- A king gains the `nations.king` permissions on top of all of the above.
+
+Permissions stack — each tier adds to the previous one. Rank permissions in `townyperms.yml` are additive only; you cannot negate a higher rank's permissions from a lower tier.
+
+---
+
+## File structure
+
+The file has four top-level sections:
+
+```yaml
+nomad:        # All players on the server
+  - ...
+
+towns:
+  default:    # Players who belong to any town
+    - ...
+  mayor:      # Town mayors
+    - ...
+  ranks:      # Named custom/built-in town ranks
+    assistant:
+      - ...
+    helper:
+      - ...
+
+nations:
+  default:    # Players whose town belongs to a nation
+    - ...
+  king:       # Nation kings
+    - ...
+  ranks:      # Named custom/built-in nation ranks
+    assistant:
+      - ...
+    helper:
+      - ...
+
+peaceful:     # Players in peaceful towns (reserved for war plugins)
+conquered:    # Players in conquered towns (reserved for war plugins)
+unconquered:  # Players in unconquered towns (reserved for war plugins)
+```
+
+---
+
+## Nomad section
+
+The `nomad` section is given to **every player on the server**, whether or not they are in a town. It should contain permissions that all players need — viewing maps, looking up towns and nations, joining or creating a town, and spawning to public towns.
+
+```yaml
+nomad:
+  - towny.command.towny.map
+  - towny.command.towny.prices
+  - towny.command.towny.tree
+  - towny.command.towny.time
+  - towny.command.towny.universe
+  - towny.command.towny.version
+  - towny.command.town.online
+  - towny.command.town.here
+  - towny.command.town.new
+  - towny.command.town.join
+  - towny.command.town.list.*
+  - towny.command.nation.list.*
+  - towny.town.resident
+  - towny.town.spawn.public
+```
+
+---
+
+## Town sections
+
+### towns.default
+
+Applied to every player who is a member of a town, in addition to `nomad`.
+
+```yaml
+towns:
+  default:
+    - towny.command.resident.*
+    - towny.command.plot.claim
+    - towny.command.plot.unclaim
+    - towny.command.plot.forsale
+    - towny.command.plot.notforsale
+    - towny.command.plot.toggle.*
+    - towny.command.plot.set.perm
+    - towny.command.plot.set.reset
+    - towny.command.town.online
+    - towny.command.town.leave
+    - towny.command.town.deposit
+    - towny.command.town.reclaim
+    - towny.town.spawn.town
+    - towny.chat.town
+```
+
+### towns.mayor
+
+Applied only to the mayor of a town, in addition to everything above.
+
+```yaml
+  mayor:
+    - towny.tax_exempt
+    - towny.command.towny.top
+    - towny.command.town.*
+    - towny.command.plot.*
+    - towny.claimed.owntown.*
+    - towny.command.nation.new
+    - towny.outlaw.jailer
+    - towny.command.nation.join
+    - towny.command.nation.leave
+```
+
+### towns.ranks
+
+Named ranks that the mayor can assign to residents using `/town rank add <resident> <rank>`. The nodes listed here are granted on top of `towns.default`.
+
+```yaml
+  ranks:
+    assistant:
+      - towny.tax_exempt
+      - towny.command.town.claim.*
+      - towny.command.town.invite.add
+      - towny.command.plot.*
+      - towny.command.town.toggle.public
+      - towny.claimed.owntown.switch.*
+      - towny.outlaw.jailer
+    helper:
+      - towny.claimed.townowned.switch.*
+    sheriff:
+      - towny.command.town.jail
+      - towny.command.town.unjail
+      - towny.command.town.jail.list
+      - towny.outlaw.jailer
+    donator:
+      - foo.bar
+    vip:
+      - foo.bar
+```
+
+A resident can hold multiple ranks at once. All assigned rank permission sets are combined.
+
+---
+
+## Nation sections
+
+### nations.default
+
+Applied to every player whose town is in a nation, in addition to their town permissions.
+
+```yaml
+nations:
+  default:
+    - towny.command.nation.online
+    - towny.command.nation.deposit
+    - towny.command.nation.spawn
+    - towny.nation.spawn.nation
+    - towny.nation.spawn.ally
+    - towny.town.spawn.nation
+    - towny.town.spawn.ally
+    - towny.chat.nation
+    - towny.chat.alliance
+```
+
+### nations.king
+
+Applied to the king of the nation, in addition to everything above.
+
+```yaml
+  king:
+    - towny.command.nation.*
+    - towny.command.nation.deposit.other
+```
+
+### nations.ranks
+
+Nation ranks work the same way as town ranks. The king assigns them with `/nation rank add <town> <rank>`.
+
+```yaml
+  ranks:
+    assistant:
+      - towny.command.nation.rank.helper
+      - towny.command.nation.invite.add
+      - towny.command.nation.ally.*
+      - towny.command.nation.enemy
+      - towny.command.nation.deposit.other
+    helper:
+      - towny.command.nation.add
+```
+
+---
+
+## Adding a custom rank
+
+<Steps>
+
+<Step title="Open townyperms.yml">
+Open `plugins/Towny/settings/townyperms.yml` in a text editor.
+</Step>
+
+<Step title="Add the rank under the correct section">
+Add a new key under `towns.ranks` (for a town rank) or `nations.ranks` (for a nation rank). The key name becomes the rank name used in commands.
+
+```yaml
+towns:
+  ranks:
+    recruiter:
+      - towny.command.town.invite.add
+      - towny.command.town.invite.sent
+```
+
+This example creates a `recruiter` rank that can send town invitations but has no other elevated permissions beyond `towns.default`.
+</Step>
+
+<Step title="Reload the plugin">
+```bash
+/ta reload
+```
+
+Towny will apply the updated rank definitions immediately.
+</Step>
+
+<Step title="Assign the rank in-game">
+```bash
+/town rank add <resident> recruiter
+```
+
+The resident now has the `recruiter` rank permissions in addition to their standard resident permissions.
+</Step>
+
+</Steps>
+
+---
+
+## Example: limiting a rank to a single command
+
+To give a rank only the permission to use `/town invite add` (inviting players to the town):
+
+```yaml
+towns:
+  ranks:
+    inviter:
+      - towny.command.town.invite.add
+```
+
+The `inviter` rank grants exactly one node. Residents with this rank can invite new players but cannot perform any other elevated town actions.
+
+<Note>
+Rank names are case-sensitive. `/town rank add Steve Inviter` will fail if the rank is defined as `inviter` in `townyperms.yml`.
+</Note>

@@ -1,0 +1,170 @@
+---
+title: "TownyAPI: the primary API entry point"
+description: "Complete reference for TownyAPI — the singleton providing object lookup, wilderness checks, teleport helpers, metadata registration, and tab-completion utilities."
+---
+
+`TownyAPI` is the recommended entry point for all external integrations with Towny. It wraps `TownyUniverse` to provide a stable, well-documented public surface. Obtain the singleton with:
+
+```java
+TownyAPI api = TownyAPI.getInstance();
+```
+
+The instance is created lazily on first access and is safe to call from any thread after Towny's `onEnable` has completed.
+
+---
+
+## Resident lookup
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getResident(String name)` | `@Nullable Resident` | Looks up a resident by their exact player name. |
+| `getResident(UUID uuid)` | `@Nullable Resident` | Looks up a resident by their player UUID. |
+| `getResident(Player player)` | `@Nullable Resident` | Convenience overload — delegates to `getResident(player.getUniqueId())`. |
+| `getResidentOrThrow(Player player)` | `@NotNull Resident` | Same as above but throws `TownyException` if no resident is found. |
+| `getResidents()` | `List<Resident>` | Returns all registered residents on the server. |
+| `getResidents(String[] names)` | `List<Resident>` | Bulk lookup by array of names; unmatched names are silently skipped. |
+| `getResidents(UUID[] uuids)` | `List<Resident>` | Bulk lookup by array of UUIDs. |
+| `getResidentsWithoutTown()` | `List<Resident>` | Returns every resident who does not belong to a town. |
+
+## Town lookup
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getTown(String name)` | `@Nullable Town` | Looks up a town by name (case-insensitive). |
+| `getTown(UUID uuid)` | `@Nullable Town` | Looks up a town by its UUID. |
+| `getTown(Location location)` | `@Nullable Town` | Returns the town that owns the chunk at the given location, or `null` for wilderness. |
+| `getTown(Player player)` | `@Nullable Town` | Returns the player's own town, or `null` if they have none. |
+| `getTowns()` | `List<Town>` | Returns all towns. |
+| `getTowns(String[] names)` | `List<Town>` | Bulk lookup by name array. |
+| `getTowns(List<UUID> uuids)` | `List<Town>` | Bulk lookup by UUID list. |
+| `getTownsWithoutNation()` | `List<Town>` | Returns every town that is not in a nation. |
+| `getTownName(Player player)` | `String` | Returns the player's town name, or `""` if they have none. |
+| `getTownName(Location location)` | `@Nullable String` | Returns the town name at a location, or `null` for wilderness. |
+| `getTownUUID(Location location)` | `@Nullable UUID` | Returns the UUID of the town at a location. |
+
+## Nation lookup
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getNation(String name)` | `@Nullable Nation` | Looks up a nation by name. |
+| `getNation(UUID uuid)` | `@Nullable Nation` | Looks up a nation by UUID. |
+| `getNation(Player player)` | `@Nullable Nation` | Returns the player's nation (via their town), or `null`. |
+| `getNations()` | `List<Nation>` | Returns all nations. |
+| `getNations(String[] names)` | `List<Nation>` | Bulk lookup by name array. |
+| `getNations(List<UUID> uuids)` | `List<Nation>` | Bulk lookup by UUID list. |
+
+## Relationship helpers
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getResidentTownOrNull(Resident resident)` | `@Nullable Town` | The resident's town, or `null`. |
+| `getResidentNationOrNull(Resident resident)` | `@Nullable Nation` | The resident's nation (via their town), or `null`. |
+| `getTownNationOrNull(Town town)` | `@Nullable Nation` | The town's nation, or `null`. |
+
+## TownBlock lookup
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getTownBlock(Location location)` | `@Nullable TownBlock` | The claimed `TownBlock` at the location, or `null` for wilderness. |
+| `getTownBlock(Player player)` | `@Nullable TownBlock` | The `TownBlock` the player is currently standing in. |
+| `getTownBlock(WorldCoord wc)` | `@Nullable TownBlock` | Lookup by `WorldCoord`. |
+| `getTownBlocks()` | `Collection<TownBlock>` | All registered `TownBlock` objects across every world. |
+| `getTownOrNull(TownBlock townBlock)` | `@Nullable Town` | The town that owns the `TownBlock`, or `null`. |
+| `getResidentOrNull(TownBlock townBlock)` | `@Nullable Resident` | The resident who personally owns the plot, or `null`. |
+
+## World and wilderness checks
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `isWilderness(Block block)` | `boolean` | `true` if the block's chunk is not claimed by any town. |
+| `isWilderness(Location location)` | `boolean` | Same check using a `Location`. |
+| `isWilderness(WorldCoord worldCoord)` | `boolean` | Same check using a `WorldCoord`. |
+| `isTownyWorld(World world)` | `boolean` | `true` if Towny is active (using Towny) in the given Bukkit world. |
+| `getTownyWorld(World world)` | `@Nullable TownyWorld` | Returns the `TownyWorld` wrapper for a Bukkit `World`. |
+| `getTownyWorld(String worldName)` | `@Nullable TownyWorld` | Lookup by world name string. |
+| `getTownyWorld(UUID worldUUID)` | `@Nullable TownyWorld` | Lookup by world UUID. |
+| `isPVP(Location location)` | `boolean` | `true` if Towny considers PVP enabled at the given location. |
+| `areMobsEnabled(Location location)` | `boolean` | `true` if Towny would allow mobs to exist at the location. |
+| `isNationZone(Location location)` | `boolean` | `true` if the location is in a nation zone (wilderness adjacent to a nation's claimed land). |
+
+## Spawn locations
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getTownSpawnLocation(Player player)` | `@Nullable Location` | The spawn point of the player's town, or `null`. |
+| `getNationSpawnLocation(Player player)` | `@Nullable Location` | The spawn point of the player's nation, or `null`. |
+
+## Online player helpers
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getPlayer(Resident resident)` | `Player` | Returns the online `Player` for a resident (or `null` if offline). |
+| `getPlayerUUID(Resident resident)` | `@Nullable UUID` | Returns the UUID of the player associated with a resident. |
+| `getOnlinePlayersInTown(Town town)` | `List<Player>` | All currently online players who belong to the town. |
+| `getOnlinePlayersInNation(Nation nation)` | `List<Player>` | All currently online players who belong to the nation. |
+| `getOnlinePlayersAlliance(Nation nation)` | `List<Player>` | Online players in the nation plus all allied nations. |
+| `getOnlineResidents(ResidentList owner)` | `List<Resident>` | Online residents within any `ResidentList` (Town or Nation). |
+
+## Teleport helpers
+
+| Method | Description |
+|--------|-------------|
+| `requestTeleport(Player player, Location spawnLoc)` | Schedules a Towny warmup teleport for the player. |
+| `requestTeleport(Player player, Location spawnLoc, int cooldown)` | Same with a custom cooldown (seconds). |
+| `abortTeleportRequest(Resident resident)` | Cancels a pending warmup teleport. |
+
+## Metadata registration
+
+| Method | Description |
+|--------|-------------|
+| `registerCustomDataField(CustomDataField<?> field)` | Registers a custom metadata field type. Throws `KeyAlreadyRegisteredException` if the key was already registered. Must be called during server startup. |
+
+## Claim validation
+
+| Method | Description |
+|--------|-------------|
+| `testTownClaimOrThrow(Town town, WorldCoord coordToClaim, boolean outpost, boolean newTown)` | Validates whether Towny would allow a claim; throws `TownyException` with a reason on failure. |
+| `testTownUnclaimOrThrow(Town town, WorldCoord coordToUnclaim)` | Validates whether Towny would allow an unclaim; throws `TownyException` on failure. |
+| `testPlotOwnerOrThrow(Resident resident, TownBlock townBlock)` | Asserts the resident is the plot owner, the town mayor, or a TownyAdmin; throws `TownyException` otherwise. |
+
+## Tab-completion utilities (static)
+
+| Method | Description |
+|--------|-------------|
+| `getTownyObjectStartingWith(String arg, String type)` | Returns names of residents (`r`), towns (`t`), nations (`n`), or worlds (`w`) that start with `arg`. Combine types: `"rt"` checks residents and towns. |
+| `filterByStartOrGetTownyObjectStartingWith(List<String> filters, String arg, String type)` | Filters `arg` against `filters` first; falls back to Towny object matching. Add `"+"` to `type` to return both. |
+| `getTownResidentNamesOfPlayerStartingWith(Player player, String str)` | Resident names in the player's own town that start with `str`. |
+| `getResidentsOfTownStartingWith(String townName, String str)` | Resident names in a named town that start with `str`. |
+| `getResidentsWithoutTownStartingWith(String str)` | Online townless resident names that start with `str`. |
+
+---
+
+## Code example
+
+```java
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.Town;
+
+public void handlePlayerInteract(Player player) {
+    TownyAPI api = TownyAPI.getInstance();
+
+    // Is this player standing in a claimed plot?
+    if (api.isWilderness(player.getLocation())) {
+        player.sendMessage("You are in the wilderness.");
+        return;
+    }
+
+    // Which town owns this plot?
+    Town town = api.getTown(player.getLocation());
+    if (town != null) {
+        player.sendMessage("You are in the town: " + town.getName());
+    }
+
+    // Look up the player's own resident object
+    Resident resident = api.getResident(player);
+    if (resident != null && resident.hasTown()) {
+        player.sendMessage("Your town: " + resident.getTownOrNull().getName());
+    }
+}
+```

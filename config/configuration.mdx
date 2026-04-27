@@ -1,0 +1,181 @@
+---
+title: "Configuring Towny: settings, costs, and toggles"
+description: "A guide to Towny's config.yml — where it lives, how to reload it, and key options controlling town creation, economy costs, world protection, and spawn behaviour."
+---
+
+Towny's main configuration file is `config.yml`. It controls almost every aspect of the plugin's behaviour: how much towns cost to create, what players can do in the wilderness, how spawning works, and much more. This page covers the major sections and their most important options.
+
+The file is generated automatically on first run and lives at:
+
+```
+plugins/Towny/settings/config.yml
+```
+
+<Note>
+After editing `config.yml`, run `/ta reload` in-game or from the console to apply your changes without restarting the server.
+</Note>
+
+## How to reload
+
+```bash
+/ta reload
+```
+
+This reloads `config.yml`, `townyperms.yml`, and the language files in one command.
+
+---
+
+## Configuration sections
+
+<AccordionGroup>
+
+<Accordion title="Town settings">
+
+These keys live under the `town` root and set the defaults that apply to every newly created town.
+
+| Config key | Default | Description |
+|---|---|---|
+| `town.default_public` | `true` | Whether new towns allow `/town spawn` from outsiders by default |
+| `town.default_open` | `false` | Whether new towns are joinable by anyone without an invite |
+| `town.default_neutral` | `false` | Whether new towns start in the peaceful/neutral state |
+| `town.default_board` | `/town set board [msg]` | The default message shown on the town board |
+| `town.set_tag_automatically` | `false` | Auto-set a town's tag from the first four characters of its name |
+| `town.default_taxes.tax` | `0.0` | Default tax amount collected from residents each new day |
+| `town.default_taxes.taxpercentage` | `true` | When `true`, the `tax` value is treated as a percentage of the resident's balance |
+| `town.default_taxes.plot_tax` | `0.0` | Default per-plot tax charged to plot owners each new day |
+| `town.default_taxes.shop_tax` | `0.0` | Default tax on shop plots |
+| `town.default_taxes.embassy_tax` | `0.0` | Default tax on embassy plots |
+| `town.default_taxes.minimumtax` | `0.0` | Minimum tax enforced on new towns even when `tax` is `0.0` |
+
+**Global town limits** live under `global_town_settings`:
+
+| Config key | Default | Description |
+|---|---|---|
+| `global_town_settings.town_limit` | `3000` | Maximum number of towns allowed on the server |
+| `global_town_settings.max_residents_per_town` | `0` | Cap on residents per town; `0` disables the cap |
+| `global_town_settings.maximum_number_residents_without_nation` | `0` | How many residents a town can have before it must join a nation; `0` disables |
+
+</Accordion>
+
+<Accordion title="Nation settings">
+
+Keys under the `nation` root set defaults for new nations. Nation-level upkeep and other economy settings are covered in the [Economy section](#economy-settings).
+
+| Config key | Default | Description |
+|---|---|---|
+| `nation.default_public` | `false` | Whether new nations start with a public spawn |
+| `nation.default_open` | `false` | Whether any town can join a new nation without an invite |
+| `nation.default_neutral` | `true` | Whether new nations start in the neutral state |
+| `nation.default_taxes.tax` | `0.0` | Default tax charged to member towns per new day |
+| `nation.default_taxes.taxpercentage` | `false` | When `true`, the nation `tax` value is treated as a percentage |
+| `nation.default_taxes.minimumtax` | `0.0` | Minimum tax enforced on new nations |
+| `nation.default_taxes.default_nation_conquered_tax` | `0` | Default conquered-town tax |
+| `nation.default_taxes.max_nation_conquered_tax` | `100` | Maximum amount a nation can charge conquered towns |
+
+</Accordion>
+
+<Accordion title="Economy settings">
+
+Economy keys live under the `economy` root. For a full breakdown of taxes, upkeep, and banks, see the [Economy integration](/config/economy) page.
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.using_economy` | `true` | Enable or disable all economy features |
+| `economy.new_expand.price_new_town` | `250.0` | Cost to found a new town |
+| `economy.new_expand.price_new_nation` | `1000.0` | Cost to found a new nation |
+| `economy.new_expand.price_claim_townblock` | `25.0` | Cost per townblock claimed |
+| `economy.new_expand.price_outpost` | `500.0` | Cost to claim an outpost |
+| `economy.new_expand.price_purchased_bonus_townblock` | `25.0` | Cost to buy a bonus townblock |
+| `economy.daily_taxes.price_town_upkeep` | `10.0` | Daily charge per town from the server |
+| `economy.daily_taxes.price_nation_upkeep` | `100.0` | Daily charge per nation from the server |
+| `economy.spawn_travel.price_town_spawn_travel` | `0.0` | Cost for a resident to use `/town spawn` |
+| `economy.spawn_travel.price_town_public_spawn_travel` | `10.0` | Maximum cost when spawning to a public town |
+
+</Accordion>
+
+<Accordion title="World settings">
+
+Towny tracks per-world data in `plugins/Towny/data/worlds/`. The `new_world_settings` section of `config.yml` sets the defaults applied when a new world is first detected. Existing worlds can be adjusted using `/townyworld toggle`.
+
+| Config key | Default | Description |
+|---|---|---|
+| `new_world_settings.using_towny` | `true` | Whether Towny protection is active in new worlds |
+| `new_world_settings.are_new_world_claimable` | `true` | Whether new worlds allow town land claims |
+| `new_world_settings.pvp.world_pvp` | `true` | PVP enabled in new worlds by default |
+| `new_world_settings.pvp.force_pvp_on` | `false` | Force PVP on, overriding individual town settings |
+| `new_world_settings.pvp.friendly_fire_enabled` | `false` | Allow residents of the same town or nation to harm each other |
+| `new_world_settings.mobs.world_monsters_on` | `true` | Hostile mobs enabled globally in new worlds |
+| `new_world_settings.mobs.wilderness_monsters_on` | `true` | Hostile mobs in unclaimed wilderness |
+| `new_world_settings.mobs.force_town_monsters_on` | `false` | Force hostile mobs on inside towns, overriding town settings |
+| `new_world_settings.explosions.world_explosions_enabled` | `true` | Explosions enabled in new worlds |
+| `new_world_settings.fire.world_firespread_enabled` | `true` | Fire spread enabled in new worlds |
+| `new_world_settings.jailing_enabled` | `true` | Whether players can be jailed in new worlds |
+
+To disable Towny on a specific existing world:
+
+```bash
+/townyworld toggle usingtowny
+```
+
+To prevent land claims in a world while keeping Towny protection active:
+
+```bash
+/townyworld toggle claimable
+```
+
+</Accordion>
+
+<Accordion title="Protection settings">
+
+Towny controls what players can do in different zones. These settings are primarily managed per-world via `/townyworld toggle` and per-plot or per-town via in-game commands. A few global overrides live in `config.yml`:
+
+| Config key | Default | Description |
+|---|---|---|
+| `new_world_settings.pvp.force_pvp_on` | `false` | Override all town PVP settings and force PVP on globally |
+| `new_world_settings.pvp.force_fire_on` | `false` | Override all town fire settings |
+| `new_world_settings.explosions.force_explosions_on` | `false` | Override all town explosion settings |
+| `new_world_settings.mobs.force_town_monsters_on` | `false` | Override all town mob settings |
+| `new_world_settings.enderman_protect` | `true` | Prevent endermen from picking up and placing blocks |
+| `new_world_settings.disable_creature_crop_trampling` | `true` | Prevent animals from trampling crops |
+| `global_town_settings.force_pvp_on_outlaws` | `false` | Allow outlaws to always be harmed in towns where they are outlawed |
+| `global_town_settings.admins_can_always_pvp` | `false` | Players with `towny.admin` can always harm others regardless of PVP setting |
+
+Plot revert on unclaim removes player-placed blocks when a townblock is unclaimed:
+
+| Config key | Default | Description |
+|---|---|---|
+| `new_world_settings.plot_management.revert_on_unclaim.enabled` | `true` | Revert unclaimed plots to their pre-claim snapshot |
+| `new_world_settings.plot_management.block_delete.enabled` | `true` | Delete certain block types when a plot is unclaimed |
+
+</Accordion>
+
+<Accordion title="Spawn settings">
+
+Spawn settings control warmup delays, cooldowns, and costs for `/town spawn` and `/nation spawn`. Keys live under the `spawning` root.
+
+| Config key | Default | Description |
+|---|---|---|
+| `spawning.town_spawn.allow_town_spawn` | `true` | Enable `/town spawn` |
+| `spawning.town_spawn.allow_town_spawn_travel` | `true` | Allow residents to spawn to public towns they are not members of |
+| `spawning.spawning_warmups.teleport_warmup_time` | `0` | Seconds before a spawn teleport executes; `0` is instant |
+| `spawning.spawning_warmups.movement_cancels_spawn_warmup` | `false` | Cancel the warmup if the player moves |
+| `spawning.spawning_warmups.damage_cancels_spawn_warmup` | `false` | Cancel the warmup if the player takes damage |
+| `spawning.town_spawn.spawning_cooldowns.town_spawn_cooldown_time` | `0` | Cooldown in seconds between uses of `/town spawn` |
+| `spawning.town_spawn.spawning_cooldowns.nation_member_town_spawn_cooldown_time` | `0` | Cooldown for nation members spawning to other nation towns |
+| `spawning.town_spawn.spawning_cooldowns.unaffiliated_town_spawn_cooldown_time` | `0` | Cooldown for unaffiliated players spawning to public towns |
+| `spawning.safe_teleport` | `false` | Find a safe landing location to prevent spawn-trap kill boxes |
+
+Spawn costs are configured in the economy section:
+
+```yaml
+economy:
+  spawn_travel:
+    price_town_spawn_travel: 0.0
+    price_town_nation_spawn_travel: 5.0
+    price_town_ally_spawn_travel: 10.0
+    price_town_public_spawn_travel: 10.0
+```
+
+</Accordion>
+
+</AccordionGroup>

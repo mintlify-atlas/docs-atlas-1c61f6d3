@@ -1,0 +1,132 @@
+---
+title: "Managing worlds with /townyworld"
+description: "Use the /townyworld command to enable Towny per world, control land claiming, and configure world-level toggles for PVP, explosions, fire, mobs, and more."
+---
+
+The `/townyworld` command (alias `/tw`) lets administrators configure how Towny behaves in each Minecraft world on the server. You can enable or disable Towny's protection system entirely per world, control what players may claim, and set world-wide defaults for PVP, fire spread, mob spawning, and explosion behavior.
+
+All `/townyworld` subcommands require the `towny.command.townyworld.*` permission, which is granted to operators by default through the `towny.admin` node.
+
+## Viewing worlds
+
+```
+/tw list
+```
+
+Lists every world Towny is aware of, along with the number of players currently in each. Requires `towny.command.townyworld.list`.
+
+Run `/tw` (or `/tw <worldname>`) with no subcommand to view the full status screen for that world.
+
+## Enabling and disabling Towny in a world
+
+```
+/tw toggle usingtowny [on|off]
+/tw <worldname> toggle usingtowny [on|off]
+```
+
+When `usingtowny` is `off`, Towny applies no protection in that world — land cannot be claimed, and none of the world toggles have any effect. This is the primary switch to completely opt a world out of Towny.
+
+<Note>
+Disabling `usingtowny` while `revertunclaim` is active will also stop any in-progress revert operations for that world.
+</Note>
+
+## Toggle flags reference
+
+Use `/tw toggle <flag> [on|off]` to change any world-level toggle. All toggles also accept an explicit `on` or `off` argument so you can set the value directly rather than flip it.
+
+| Flag | What it controls |
+|---|---|
+| `usingtowny` | Enables/disables Towny protection in this world entirely |
+| `claimable` | Whether players can claim land (TownBlocks) in this world |
+| `pvp` | Enables global PVP across the entire world (wilderness and towns) |
+| `forcepvp` | Forces PVP on in every town, overriding each town's own PVP toggle |
+| `friendlyfire` | Allows players in the same town to deal damage to one another |
+| `explosion` | Allows explosions globally in the world (wilderness and towns) |
+| `forceexplosion` | Forces explosions on in every town, overriding each town's explosion toggle |
+| `fire` | Allows fire spread globally in the world |
+| `forcefire` | Forces fire spread on in every town, overriding each town's fire toggle |
+| `townmobs` | Forces mob spawning on inside town-owned plots |
+| `worldmobs` | Enables mob spawning across the entire world |
+| `wildernessmobs` | Enables mob spawning in unclaimed wilderness areas |
+| `revertunclaim` | Reverts a plot to its pre-claimed state when a town unclaims it |
+| `revertentityexpl` | Reverts wilderness blocks destroyed by entity explosions (e.g. Creepers) |
+| `revertblockexpl` | Reverts wilderness blocks destroyed by block explosions (e.g. TNT) |
+| `warallowed` | Permits war (e.g. FlagWar) to occur in this world |
+| `wildernessuse` | Enables build/destroy/switch/item-use in the wilderness for all players |
+| `jailing` | Enables Towny's jailing system in this world |
+| `unclaimblockdelete` | Deletes blocks in a plot when it is unclaimed |
+| `unclaimentitydelete` | Deletes entities in a plot when it is unclaimed |
+| `plotcleardelete` | Deletes blocks when a mayor uses `/plot clear` |
+
+### Example: disabling explosions in a world
+
+```
+/tw world_nether toggle explosion off
+/tw world_nether toggle forceexplosion off
+```
+
+### Example: enabling Towny in a new world
+
+```
+/tw my_new_world toggle usingtowny on
+/tw my_new_world toggle claimable on
+```
+
+## Revert on unclaim
+
+```
+/tw toggle revertunclaim [on|off]
+```
+
+When enabled, Towny records the pre-claim state of every plot chunk. If the town later unclaims that chunk, the land is automatically regenerated back to how it looked before the town claimed it. This is useful for preventing griefing through claim-and-destroy tactics.
+
+<Warning>
+Enabling `revertunclaim` on a world that already has many existing claims will not snapshot those existing plots retroactively — only plots claimed after the toggle is enabled will be eligible for revert.
+</Warning>
+
+## World regeneration
+
+```
+/tw regen
+```
+
+Triggers a regeneration of the current world chunk. Requires `towny.command.townyworld.regen`. This is typically used alongside the revert system.
+
+## The `/tw set` subcommands
+
+`/tw set` (requires `towny.command.townyworld.set`) configures wilderness-specific properties:
+
+| Subcommand | Example | Description |
+|---|---|---|
+| `usedefault` | `/tw set usedefault` | Resets this world's settings to server defaults (prompts confirmation) |
+| `wildperm` | `/tw set wildperm build destroy` | Sets which actions players can perform in the wilderness (`build`, `destroy`, `switch`, `itemuse`) |
+| `wildignore` | `/tw set wildignore OAK_SAPLING GOLD_ORE` | Lists material names that bypass wilderness protection |
+| `wildregen` | `/tw set wildregen Creeper,TNTPrimed` | Sets which entity types trigger wilderness explosion revert |
+| `wildname` | `/tw set wildname Wilderness` | Sets the display name shown when players enter unclaimed land |
+
+### Setting wilderness permissions
+
+```
+/tw set wildperm build destroy switch itemuse
+```
+
+This allows all players to build, destroy, use switches, and use items in the wilderness of the current world. Omit any action to deny it.
+
+### Setting the wilderness display name
+
+```
+/tw set wildname The Badlands
+```
+
+When a player crosses from a town into unclaimed land, the border title will show "The Badlands" as the area name.
+
+## Targeting a specific world from the console
+
+When running commands from the console, prefix any subcommand with the world name:
+
+```
+/tw world_the_end toggle claimable off
+/tw world_nether set wildperm build destroy
+```
+
+Players running `/tw` without a world name argument automatically target the world they are currently standing in.

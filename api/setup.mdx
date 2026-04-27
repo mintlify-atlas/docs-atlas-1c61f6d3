@@ -1,0 +1,114 @@
+---
+title: "Add Towny as a Maven or Gradle dependency"
+description: "Step-by-step guide to adding Towny via JitPack, declaring the dependency in plugin.yml, and obtaining the TownyAPI and TownyUniverse singletons."
+---
+
+Towny is distributed through [JitPack](https://jitpack.io), which builds directly from the GitHub repository. No private repository credentials are required. The artifact coordinates are:
+
+- **Group ID:** `com.github.TownyAdvanced`
+- **Artifact ID:** `Towny`
+- **Version:** use a specific release tag such as `0.102.0.0`, or `master-SNAPSHOT` for the latest commit.
+
+<Steps>
+  <Step title="Add the JitPack repository">
+    JitPack must be declared as a repository before Maven or Gradle can resolve the Towny artifact.
+
+    <CodeGroup>
+
+    ```xml Maven (pom.xml)
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+    ```
+
+    ```groovy Gradle (build.gradle)
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+    ```
+
+    </CodeGroup>
+  </Step>
+
+  <Step title="Declare the Towny dependency">
+    Add Towny with `provided` / `compileOnly` scope — Towny's JAR is already present on the server at runtime, so you must not bundle it.
+
+    <CodeGroup>
+
+    ```xml Maven (pom.xml)
+    <dependencies>
+        <dependency>
+            <groupId>com.github.TownyAdvanced</groupId>
+            <artifactId>Towny</artifactId>
+            <version>0.102.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    ```
+
+    ```groovy Gradle (build.gradle)
+    dependencies {
+        compileOnly 'com.github.TownyAdvanced:Towny:0.102.0.0'
+    }
+    ```
+
+    </CodeGroup>
+
+    <Tip>
+    Replace `0.102.0.0` with the latest release tag from the [Towny releases page](https://github.com/TownyAdvanced/Towny/releases). Pinning to a specific tag is recommended for reproducible builds.
+    </Tip>
+  </Step>
+
+  <Step title="Declare the dependency in plugin.yml">
+    Towny must be fully loaded before your plugin starts. Use `depend` if your plugin cannot function at all without Towny, or `softdepend` if Towny is optional.
+
+    <CodeGroup>
+
+    ```yaml Hard dependency (plugin.yml)
+    name: MyPlugin
+    version: 1.0.0
+    main: com.example.myplugin.MyPlugin
+    depend: [Towny]
+    ```
+
+    ```yaml Soft dependency (plugin.yml)
+    name: MyPlugin
+    version: 1.0.0
+    main: com.example.myplugin.MyPlugin
+    softdepend: [Towny]
+    ```
+
+    </CodeGroup>
+
+    <Warning>
+    If you use `softdepend`, always null-check for Towny before calling any API method, because the plugin may not be present on every server.
+    </Warning>
+  </Step>
+
+  <Step title="Get the TownyAPI instance">
+    `TownyAPI` is a singleton. Call `TownyAPI.getInstance()` from anywhere after your plugin's `onEnable` has run (i.e., after Towny has loaded its database).
+
+    ```java
+    import com.palmergames.bukkit.towny.TownyAPI;
+    import com.palmergames.bukkit.towny.TownyUniverse;
+
+    public class MyPlugin extends JavaPlugin {
+
+        @Override
+        public void onEnable() {
+            TownyAPI api = TownyAPI.getInstance();
+            TownyUniverse universe = TownyUniverse.getInstance();
+
+            getLogger().info("Towny has " + api.getTowns().size() + " towns loaded.");
+        }
+    }
+    ```
+
+    <Note>
+    `TownyUniverse` is Towny's internal data store. It exposes lower-level access (raw maps, the data source, permission source, etc.). For most use cases `TownyAPI` is sufficient.
+    </Note>
+  </Step>
+</Steps>

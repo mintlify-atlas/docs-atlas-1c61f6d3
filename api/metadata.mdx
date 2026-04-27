@@ -1,0 +1,178 @@
+---
+title: "Custom metadata fields for Towny objects"
+description: "Attach persistent typed key-value data to Resident, Town, Nation, and TownBlock objects using CustomDataField and its concrete subtypes."
+---
+
+Towny's metadata system lets you attach typed key-value data to any `TownyObject` — including `Resident`, `Town`, `Nation`, `TownBlock`, and `TownyWorld`. The data is automatically saved to Towny's database alongside the object it belongs to, so it survives server restarts without any extra persistence code.
+
+Metadata is the right tool when you need to store small amounts of structured data that should be co-located with a Towny object and be accessible to other plugins or admin commands. For large or relational data sets, a separate database is more appropriate.
+
+---
+
+## CustomDataField
+
+**Class:** `com.palmergames.bukkit.towny.object.metadata.CustomDataField<T>`
+
+`CustomDataField` is the abstract base class. Every field has:
+
+- A **key** — a unique string identifier, e.g. `"myplugin_points"`.
+- A **value** of type `T`.
+- An optional **label** — if set, Towny will display the field on the object's `/res`, `/town`, or `/nation` status screen.
+
+### Core methods
+
+| Method | Description |
+|--------|-------------|
+| `getKey()` | Returns the unique key string. |
+| `getValue()` | Returns the current value. |
+| `setValue(T value)` | Sets the value directly. |
+| `setValueFromString(String strValue)` | Parses and sets the value from a string (used for in-game admin editing). |
+| `getLabel()` | Returns the display label, or `"nil"` if none is set. |
+| `hasLabel()` | Whether a label has been set. |
+| `setLabel(String label)` | Sets the display label. |
+| `shouldDisplayInStatus()` | Returns `true` if the field should be shown on status screens (requires a label). |
+| `getTypeID()` | Returns the serialisation type identifier string for this field class. |
+| `clone()` | Returns a deep copy of the field. |
+
+---
+
+## Concrete subtypes
+
+| Class | Type parameter `T` | `typeID()` |
+|-------|--------------------|------------|
+| `StringDataField` | `String` | `"towny_stringdf"` |
+| `IntegerDataField` | `Integer` | `"towny_intdf"` |
+| `BooleanDataField` | `Boolean` | `"towny_booldf"` |
+| `LongDataField` | `Long` | `"towny_longdf"` |
+| `DecimalDataField` | `Double` | `"towny_decdf"` |
+| `ByteDataField` | `Byte` | `"towny_bytedf"` |
+| `ListDataField` | `List<String>` | `"towny_listdf"` |
+| `LocationDataField` | `Location` | `"towny_locdf"` |
+
+All concrete classes are in `com.palmergames.bukkit.towny.object.metadata`.
+
+### StringDataField constructors
+
+```java
+// Key only — value is null until set
+new StringDataField(String key)
+
+// Key and initial value
+new StringDataField(String key, String value)
+
+// Key, initial value, and display label
+new StringDataField(String key, String value, String label)
+```
+
+The same three-argument pattern applies to all concrete subtypes.
+
+---
+
+## Registering a custom field
+
+Before you can attach a field to any object, you must register its "template" (a prototype instance) with Towny. Do this during your plugin's `onEnable`, **after** Towny has loaded.
+
+```java
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.exceptions.KeyAlreadyRegisteredException;
+import com.palmergames.bukkit.towny.object.metadata.IntegerDataField;
+
+public class MyPlugin extends JavaPlugin {
+
+    // Store a static reference to the prototype — use it when reading/writing later.
+    public static final IntegerDataField POINTS_FIELD =
+        new IntegerDataField("myplugin_points", 0, "Points");
+
+    @Override
+    public void onEnable() {
+        try {
+            TownyAPI.getInstance().registerCustomDataField(POINTS_FIELD);
+        } catch (KeyAlreadyRegisteredException e) {
+            getLogger().warning("Metadata key already registered: " + e.getMessage());
+        }
+    }
+}
+```
+
+<Warning>
+Call `registerCustomDataField` only once per key. Attempting to register the same key a second time throws `KeyAlreadyRegisteredException`. Guard against this if your plugin supports reload.
+</Warning>
+
+---
+
+## Attaching and reading a field
+
+Once registered, you can clone the prototype and attach it to any `TownyObject`, then read it back later using the key.
+
+```java
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
+import com.palmergames.bukkit.towny.object.metadata.IntegerDataField;
+import com.palmergames.bukkit.towny.utils.MetaDataUtil;
+
+// Writing — add or update the field on a resident
+public void setPoints(Resident resident, int points) {
+    IntegerDataField field = (IntegerDataField) POINTS_FIELD.clone();
+    field.setValue(points);
+
+    // MetaDataUtil.addOrUpdateMetaData handles both add and update in one call.
+    MetaDataUtil.addOrUpdateMetaData(resident, field, true); // true = save immediately
+}
+
+// Reading — retrieve the field value
+public int getPoints(Resident resident) {
+    CustomDataField<?> raw = resident.getMetaData(POINTS_FIELD.getKey());
+    if (raw instanceof IntegerDataField intField && intField.getValue() != null) {
+        return intField.getValue();
+    }
+    return 0; // default if not set
+}
+```
+
+You can also check for the presence of a field without reading its value:
+
+```java
+boolean hasField = resident.hasMeta(POINTS_FIELD.getKey());
+```
+
+---
+
+## Attaching metadata to a Town
+
+The API is identical for all Towny objects — just swap the object type:
+
+```java
+import com.palmergames.bukkit.towny.object.Town;
+import com.palmergames.bukkit.towny.object.metadata.BooleanDataField;
+import com.palmergames.bukkit.towny.utils.MetaDataUtil;
+
+public static final BooleanDataField VIP_FIELD =
+    new BooleanDataField("myplugin_is_vip_town", false, "VIP Town");
+
+public void markTownAsVIP(Town town) {
+    BooleanDataField field = (BooleanDataField) VIP_FIELD.clone();
+    field.setValue(true);
+    MetaDataUtil.addOrUpdateMetaData(town, field, true);
+}
+
+public boolean isTownVIP(Town town) {
+    CustomDataField<?> raw = town.getMetaData(VIP_FIELD.getKey());
+    if (raw instanceof BooleanDataField boolField && boolField.getValue() != null) {
+        return boolField.getValue();
+    }
+    return false;
+}
+```
+
+---
+
+## When to use metadata vs. other storage
+
+| Use case | Recommendation |
+|----------|---------------|
+| Small typed value co-located with a Towny object | **CustomDataField** — automatic persistence, admin-editable in-game |
+| Simple on/off flag | `BooleanDataField` |
+| Counter or score | `IntegerDataField` or `LongDataField` |
+| Location (e.g. a custom spawn) | `LocationDataField` |
+| Large relational data | Separate database — metadata is not designed for querying across objects |
+| Data not tied to a specific Towny object | Config file or your own database |

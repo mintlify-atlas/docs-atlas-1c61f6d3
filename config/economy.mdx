@@ -1,0 +1,225 @@
+---
+title: "Economy integration: Vault, taxes, and banks"
+description: "How Towny integrates with Vault for economy, how town and nation banks work, how taxes and upkeep are collected, and what happens when a town can't pay upkeep."
+---
+
+Towny's economy features require a Vault-compatible economy plugin. Vault bridges Towny to plugins like EssentialsX Economy, CMI, or any other economy plugin that registers a Vault provider. Reserve is also supported as an alternative bridge.
+
+Set `economy.using_economy: true` in `config.yml` to enable all economy features. When no Vault or Reserve provider is found, town and nation creation will be blocked.
+
+---
+
+## Town bank
+
+Each town has an internal bank account. Funds in the bank pay for:
+
+- Daily upkeep (charged by the server)
+- Nation tax (when the town belongs to a nation)
+- Plot tax payments from residents (deposited in)
+- Spawn costs paid to the town
+
+Residents deposit money into the town bank using:
+
+```bash
+/town deposit <amount>
+```
+
+The mayor (or players with the `towny.command.town.withdraw` permission) withdraws funds using:
+
+```bash
+/town withdraw <amount>
+```
+
+Bank limits are configured in `config.yml`:
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.banks.town_bank_cap` | `0.0` | Maximum balance; `0` means no limit |
+| `economy.banks.town_bank_cap_is_plotbased` | `false` | Scale the cap by the number of claimed plots |
+| `economy.banks.town_allow_withdrawals` | `true` | Allow mayors to withdraw |
+| `economy.banks.town_min_deposit` | `0` | Minimum deposit amount per transaction |
+| `economy.banks.town_min_withdraw` | `0` | Minimum withdrawal per transaction |
+| `economy.banks.town_max_deposit` | `-1` | Maximum deposit per transaction; `-1` disables the limit |
+| `economy.banks.town_max_withdraw` | `-1` | Maximum withdrawal per transaction; `-1` disables the limit |
+| `economy.banks.disallow_bank_actions_outside_town` | `false` | Require players to be inside their town to deposit or withdraw |
+
+When a town is deleted, its bank balance is paid to the mayor if `economy.banks.is_deleted_town_and_nation_bank_balances_paid_to_owner` is `true` (default).
+
+---
+
+## Nation bank
+
+Nations have their own bank account funded by member town tax payments and direct deposits.
+
+```bash
+/nation deposit <amount>
+/nation withdraw <amount>
+```
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.banks.nation_bank_cap` | `0.0` | Maximum nation bank balance; `0` means no limit |
+| `economy.banks.nation_allow_withdrawals` | `true` | Allow the king to withdraw |
+| `economy.banks.nation_min_deposit` | `0` | Minimum deposit per transaction |
+| `economy.banks.nation_min_withdraw` | `0` | Minimum withdrawal per transaction |
+| `economy.banks.nation_max_deposit` | `-1` | Maximum deposit per transaction |
+| `economy.banks.nation_max_withdraw` | `-1` | Maximum withdrawal per transaction |
+
+---
+
+## Taxes
+
+Taxes are collected at the start of each new Towny day. `economy.daily_taxes.enabled` must be `true` for any taxes or upkeep to run.
+
+### Town tax (resident to town)
+
+Towns charge their residents a daily tax. The amount is set per-town by the mayor using `/town set taxes <amount>`. The server enforces a maximum:
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.daily_taxes.max_town_tax_amount` | `1000.0` | Maximum flat tax a town can charge |
+| `economy.daily_taxes.max_town_tax_percent` | `25` | Maximum percentage tax |
+| `economy.daily_taxes.max_town_tax_percent_amount` | `10000` | Cap on amount collected when using percentage tax |
+
+### Plot tax (resident to town)
+
+Residents who own plots pay a per-plot tax each new day. Mayors set this with `/town set plottax <amount>`.
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.daily_taxes.max_plot_tax_amount` | `1000.0` | Maximum plot tax per plot |
+
+If a resident cannot pay their plot tax, the plot is returned to the town (or put up for sale if `town.default_taxes.does_non-payment_place_plot_for_sale` is `true`).
+
+### Shop and embassy tax
+
+Shop plots and embassy plots carry their own tax rates, set by the mayor with `/town set shoptax` and `/town set embassytax`.
+
+### Nation tax (town to nation)
+
+Member towns pay a daily tax to their nation. The king sets this with `/nation set taxes <amount>`.
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.daily_taxes.max_nation_tax_amount` | `1000.0` | Maximum flat nation tax |
+| `economy.daily_taxes.max_nation_tax_percent` | `25` | Maximum percentage nation tax |
+| `economy.daily_taxes.max_nation_tax_percent_amount` | `10000` | Cap on amount collected via percentage |
+
+If a town cannot pay its nation tax, it is kicked from the nation.
+
+---
+
+## Upkeep
+
+Upkeep is a server-side charge that towns and nations pay each new day to remain active.
+
+### Town upkeep
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.daily_taxes.price_town_upkeep` | `10.0` | Base daily charge per town |
+| `economy.daily_taxes.town_plotbased_upkeep` | `false` | Multiply upkeep by the number of claimed plots instead of using town level |
+| `economy.daily_taxes.town_plotbased_upkeep_minimum_amount` | `0.0` | Minimum upkeep when using plot-based upkeep |
+| `economy.daily_taxes.town_plotbased_upkeep_maximum_amount` | `0.0` | Maximum upkeep; `0` means no cap |
+| `economy.daily_taxes.per_outpost_cost` | `0.0` | Additional daily cost per outpost owned by the town |
+
+If a town fails to pay upkeep and the bankruptcy system is disabled, all residents are kicked and the town is deleted.
+
+### Nation upkeep
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.daily_taxes.price_nation_upkeep` | `100.0` | Base daily charge per nation |
+| `economy.daily_taxes.nation_pertown_upkeep` | `false` | Multiply upkeep by the number of towns in the nation |
+| `economy.daily_taxes.nation_perplot_upkeep` | `false` | Multiply upkeep by the total plot count across all member towns |
+
+If a nation fails to pay upkeep, all member towns are kicked from the nation and the nation is deleted.
+
+---
+
+## New day
+
+Towny's "new day" event fires according to the `new_day` timer in `config.yml`. When it fires:
+
+1. Nation tax is collected from member towns.
+2. Town tax is collected from residents.
+3. Plot tax is collected from plot owners.
+4. Town upkeep is deducted from town banks.
+5. Nation upkeep is deducted from nation banks.
+
+Administrators can trigger a new day manually:
+
+```bash
+/ta newday
+```
+
+---
+
+## Costs summary
+
+| Cost type | Config key | Default |
+|---|---|---|
+| New town | `economy.new_expand.price_new_town` | `250.0` |
+| New nation | `economy.new_expand.price_new_nation` | `1000.0` |
+| Claim townblock | `economy.new_expand.price_claim_townblock` | `25.0` |
+| Outpost | `economy.new_expand.price_outpost` | `500.0` |
+| Bonus townblock | `economy.new_expand.price_purchased_bonus_townblock` | `25.0` |
+| Town upkeep (daily) | `economy.daily_taxes.price_town_upkeep` | `10.0` |
+| Nation upkeep (daily) | `economy.daily_taxes.price_nation_upkeep` | `100.0` |
+| Town spawn | `economy.spawn_travel.price_town_spawn_travel` | `0.0` |
+| Public town spawn | `economy.spawn_travel.price_town_public_spawn_travel` | `10.0` |
+| Reclaim ruined town | `economy.new_expand.price_reclaim_ruined_town` | `500.0` |
+| Town rename | `economy.town_rename_cost` | `0` |
+| Nation rename | `economy.nation_rename_cost` | `0` |
+
+---
+
+## Bankruptcy
+
+The bankruptcy system prevents towns from being deleted the moment they miss an upkeep payment. Enable it with:
+
+```yaml
+economy:
+  bankruptcy:
+    enabled: true
+```
+
+When a town cannot pay upkeep, it enters a **bankrupt state**:
+
+- The town bank balance goes negative (into debt).
+- The town cannot expand: no claiming, no recruiting, no new outposts.
+- Residents can still deposit money to pay off the debt using `/town deposit <amount>`.
+- Once the debt is fully repaid, the town immediately returns to normal.
+
+Debt is capped based on the estimated value of the town (new town cost + claimed blocks cost + outpost costs). You can override this:
+
+| Config key | Default | Description |
+|---|---|---|
+| `economy.bankruptcy.debt_cap.maximum` | `0.0` | Override cap maximum; `0` uses the calculated cap |
+| `economy.bankruptcy.debt_cap.override` | `0.0` | Set all towns to the same fixed debt cap |
+| `economy.bankruptcy.upkeep.delete_towns_that_reach_debt_cap` | `false` | Delete a town when it reaches the debt cap and cannot continue accruing debt |
+| `economy.bankruptcy.debt_cap.debt_cap_uses_fixed_days` | `false` | Delete a town after a fixed number of bankrupt days |
+| `economy.bankruptcy.debt_cap.allowed_days` | `7` | How many days a town can be bankrupt before deletion (requires `debt_cap_uses_fixed_days: true`) |
+
+<Warning>
+If `delete_towns_that_reach_debt_cap` is `false` and no fixed-day limit is set, bankrupt towns remain permanently without paying upkeep. Set at least one deletion condition if you want the system to clean up dead towns.
+</Warning>
+
+---
+
+## Ruined towns
+
+When the town ruining system is enabled (`town_ruining.town_ruins.enabled: true`), a town that falls does not immediately vanish. Instead it enters a **ruined state**:
+
+- The land remains claimed but cannot be built on normally.
+- After the minimum ruin duration, any player can reclaim the town using `/town reclaim` (costs `economy.new_expand.price_reclaim_ruined_town`, default `500.0`).
+- After the maximum ruin duration, the town is completely removed.
+
+| Config key | Default | Description |
+|---|---|---|
+| `town_ruining.town_ruins.enabled` | `false` | Enable the ruins system |
+| `town_ruining.town_ruins.min_duration_hours` | `4` | Minimum hours before reclaim is possible |
+| `town_ruining.town_ruins.max_duration_hours` | `72` | Hours after which the ruin is deleted |
+| `town_ruining.town_ruins.reclaim_enabled` | `true` | Allow players to reclaim the ruin |
+| `town_ruining.town_ruins.town_bank_is_sent_to_nation` | `false` | Send remaining town bank balance to the nation when ruined |
+| `town_ruining.empty_towns_become_ruins` | `false` | Turn empty towns into ruins instead of deleting them |

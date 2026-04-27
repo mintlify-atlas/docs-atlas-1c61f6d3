@@ -1,0 +1,51 @@
+---
+title: "Towny Developer API: build add-on plugins"
+description: "The Towny Developer API gives plugin developers access to residents, towns, nations, custom events, metadata, and command injection — distributed via JitPack."
+---
+
+The Towny Developer API lets you integrate directly with Towny's data model and event system from your own Bukkit or Paper plugin. You can look up residents, towns, and nations by name or UUID; react to in-game changes via Bukkit events; attach persistent custom data to any Towny object; and inject new subcommands into `/town`, `/nation`, and other built-in commands.
+
+All API classes live in the `com.palmergames.bukkit.towny` package and are distributed through JitPack, so no private repository access is required. The primary entry point is the `TownyAPI` singleton; the internal data store is accessible through `TownyUniverse`.
+
+## What the API offers
+
+- **Object lookup** — fetch `Resident`, `Town`, `Nation`, `TownBlock`, and `TownyWorld` objects by name, UUID, location, or player reference.
+- **Event system** — listen to dozens of cancellable and non-cancellable Bukkit events covering every major Towny action.
+- **Custom metadata** — attach typed key-value data to any Towny object and have it automatically persisted.
+- **Command addons** — inject your own subcommands into Towny's command tree without touching Towny's source code.
+- **Tab completion helpers** — static utilities for building tab completers that return resident, town, and nation names.
+
+## Who this is for
+
+Any developer building a Bukkit or Paper plugin that needs to interact with Towny's towns, nations, or land-claim system. You should be comfortable writing a basic Bukkit plugin before using this API.
+
+<Note>
+Towny requires **Java 17** and targets the Paper API. Your plugin must list Towny as a dependency in `plugin.yml` to guarantee Towny is loaded first.
+</Note>
+
+Ready to add Towny to your project? Start with the [setup guide](/api/setup).
+
+---
+
+## API reference pages
+
+<CardGroup cols={2}>
+  <Card title="Setup" icon="wrench" href="/api/setup">
+    Add Towny as a Maven or Gradle dependency and get your first API call working.
+  </Card>
+  <Card title="TownyAPI" icon="code" href="/api/townyapi">
+    The primary singleton — look up residents, towns, nations, and world state.
+  </Card>
+  <Card title="Core objects" icon="cube" href="/api/objects">
+    Resident, Town, Nation, TownBlock, and TownyWorld — fields and key methods.
+  </Card>
+  <Card title="Events" icon="bolt" href="/api/events">
+    Full categorised list of Towny Bukkit events and how to listen to them.
+  </Card>
+  <Card title="Metadata" icon="tag" href="/api/metadata">
+    Attach persistent typed key-value data to any Towny object.
+  </Card>
+  <Card title="Command addons" icon="terminal" href="/api/command-addon">
+    Inject subcommands into /town, /nation, and other Towny commands.
+  </Card>
+</CardGroup>

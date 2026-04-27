@@ -1,0 +1,110 @@
+---
+title: "Residents: players in the Towny hierarchy"
+description: "Every player on a Towny server is automatically a Resident. Residents join towns, manage personal permissions, maintain a friend list, and toggle display modes."
+---
+
+Every player who joins a Towny-enabled server becomes a **Resident** automatically. No command is needed. The Resident object stores everything Towny needs to know about a player: their town membership, personal permissions, friends, active modes, and town ranks.
+
+## Viewing your resident status
+
+Run `/res` to see your own status screen, or `/res <name>` to view another player's public profile. The screen shows your town, ranks, registered date, last online timestamp, and current personal permission settings.
+
+```bash
+/res
+/res Steve
+```
+
+## Friend list
+
+Residents can maintain a personal friend list. Friends can be granted special access to your owned plots through plot permission settings.
+
+```bash
+/res friend add <name>
+/res friend remove <name>
+/res friend list
+```
+
+<Note>
+Adding someone as a friend is one-sided. The other player does not need to add you back for you to grant them plot access.
+</Note>
+
+## Personal permissions (toggles)
+
+Each Resident has a set of personal permission toggles that control what happens on **plots they personally own**. These override town-level defaults on owned plots.
+
+```bash
+/res toggle explosion
+/res toggle fire
+/res toggle mobs
+/res toggle pvp
+/res toggle bedspawn
+```
+
+| Toggle | What it controls |
+|---|---|
+| `explosion` | Whether explosions (TNT, creepers) can damage blocks on your plots |
+| `fire` | Whether fire can spread on your plots |
+| `mobs` | Whether hostile mobs can spawn on your plots |
+| `pvp` | Whether player-versus-player combat is enabled on your plots |
+| `bedspawn` | Whether you can set your spawn point using a bed |
+
+## Resident modes
+
+Modes are persistent toggles that change how you interact with the Towny world. They stay active until you turn them off or log out (depending on server configuration).
+
+```bash
+/res toggle <mode>
+/res set mode <mode>
+/res set mode clear
+```
+
+| Mode | Effect |
+|---|---|
+| `map` | Displays a live ASCII map of nearby town claims in chat as you move |
+| `townclaim` | Automatically claims chunks for your town as you walk through them |
+| `townunclaim` | Automatically unclaims chunks for your town as you walk through them |
+| `plotborder` | Shows particle effects at plot boundaries when you cross them |
+| `constantplotborder` | Continuously shows particle effects at all nearby plot boundaries |
+| `townborder` | Shows particle effects at the edge of your town's claimed area |
+| `infotool` | Displays plot information when you right-click a block |
+| `plotgroup` | Groups plots together as you claim them |
+| `district` | Adds newly claimed plots to the active district |
+| `bedspawn` | Allows setting spawn via bed even when `deny_bed_use` is active server-wide |
+| `bordertitles` | Shows town name as a title/subtitle when crossing claim borders |
+| `ignoreinvites` | Suppresses incoming town/nation invite notifications |
+| `ignoreplots` | Hides plot-for-sale notifications |
+| `spy` | (Admin) Lets you see all chat channels |
+
+## Resident ranks within a town
+
+Once a Resident is a member of a town, the mayor can assign them **town ranks**. Ranks grant additional permissions defined in `townyperms.yml`. Common built-in ranks include `assistant` and `vip`, but server administrators can define custom ranks.
+
+```bash
+# Mayor assigns a rank
+/town rank add <resident> <rank>
+/town rank remove <resident> <rank>
+```
+
+A Resident can hold multiple ranks at the same time. Ranks stack — permissions are additive across all assigned ranks.
+
+## Townless residents
+
+Players who have not joined a town are called **townless residents**. Servers can grant additional freedoms or restrictions to townless players through the `towny.townless` permission node.
+
+<Tip>
+Server administrators can use the `towny.townless` node in their permission plugin to give townless players special access — for example, allowing them to build in the wilderness or restricting certain commands until they join a town.
+</Tip>
+
+Common uses of the `towny.townless` permission:
+- Granting wilderness build access to players who haven't settled yet
+- Restricting economy commands until a player joins a town
+- Assigning a special display prefix
+
+## Title and surname
+
+Mayors and assistants can set a custom **title** (prefix) and **surname** (suffix) on a resident's displayed name. These are cleared automatically when the resident leaves the town.
+
+```bash
+/town set title <player> <title>
+/town set surname <player> <surname>
+```

@@ -1,0 +1,168 @@
+---
+title: "Resident command reference (/res, /resident)"
+description: "Full reference for /resident and its aliases /res, /p, and /player — view profiles, manage friends, set modes, toggle plot flags, and handle jail bail."
+---
+
+The resident commands let every player interact with their own profile and manage personal settings. Use `/res` as the shortest alias; `/resident`, `/p`, and `/player` are all equivalent.
+
+<Note>
+Most resident subcommands require the player to be registered as a Towny resident (i.e. have joined a Towny-enabled world). Looking up another resident requires `towny.command.resident.otherresident`, which is granted to all players by default.
+</Note>
+
+## Subcommand overview
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/res` | Display your own resident status screen. | *(any player)* |
+| `/res <player>` | View another player's resident status. | `towny.command.resident.otherresident` |
+| `/res list` | List all residents on the server. | `towny.command.resident.list` |
+| `/res friend add <player>` | Add a player to your friend list. | `towny.command.resident.friend` |
+| `/res friend remove <player>` | Remove a player from your friend list. | `towny.command.resident.friend` |
+| `/res friend clear` | Clear your entire friend list. | `towny.command.resident.friend` |
+| `/res friend list` | List your current friends. | `towny.command.resident.friend` |
+| `/res set perm <on\|off>` | Set personal plot permission flags. | `towny.command.resident.set.perm` |
+| `/res set mode <mode>` | Toggle a resident display/visual mode. | `towny.command.resident.set.mode` |
+| `/res set about <text>` | Set your resident about/biography text. | `towny.command.resident.set.about` |
+| `/res toggle explosion` | Toggle explosion protection on your plots. | `towny.command.resident.toggle.explosion` |
+| `/res toggle fire` | Toggle fire spread on your plots. | `towny.command.resident.toggle.fire` |
+| `/res toggle mobs` | Toggle mob spawning on your plots. | `towny.command.resident.toggle.mobs` |
+| `/res toggle pvp` | Toggle PvP on your plots. | `towny.command.resident.toggle.pvp` |
+| `/res toggle bedspawn` | Toggle whether you respawn at your bed. | `towny.command.resident.toggle.bedspawn` |
+| `/res toggle map` | Toggle the auto-map display as you walk. | `towny.command.resident.toggle.map` |
+| `/res toggle townclaim` | Show town claim borders on the map. | `towny.command.resident.toggle.townclaim` |
+| `/res toggle plotborder` | Highlight individual plot borders. | `towny.command.resident.toggle.plotborder` |
+| `/res toggle constantplotborder` | Always show plot borders (not just on entry). | `towny.command.resident.toggle.constantplotborder` |
+| `/res toggle townborder` | Highlight outer town borders only. | `towny.command.resident.toggle.townborder` |
+| `/res toggle plotgroup` | Show plot group info when crossing borders. | `towny.command.resident.toggle.plotgroup` |
+| `/res toggle district` | Show district info when crossing borders. | `towny.command.resident.toggle.district` |
+| `/res toggle bordertitles` | Show town entry/exit titles on screen. | `towny.command.resident.toggle.bordertitles` |
+| `/res toggle infotool` | Toggle the info-tool item in your hand. | `towny.command.resident.toggle.infotool` |
+| `/res toggle ignoreinvites` | Ignore all incoming Towny invites. | `towny.command.resident.toggle.ignoreinvites` |
+| `/res toggle ignoreotherchannels` | Ignore chat from other Towny channels. | `towny.command.resident.toggle.ignoreotherchannels` |
+| `/res toggle ignoreplots` | Ignore plot boundary notifications. | `towny.command.resident.toggle.ignoreplots` |
+| `/res toggle townunclaim` | Show town unclaim borders on the map. | `towny.command.resident.toggle.townunclaim` |
+| `/res tax` | View the taxes applied to your plots. | `towny.command.resident.tax` |
+| `/res plotlist` | List all plots owned by you or another resident. | `towny.command.resident.plotlist` |
+| `/res outlawlist` | List towns where you are an outlaw. | `towny.command.resident.outlawlist` |
+| `/res jail paybail` | Pay the bail amount to leave jail. | `towny.command.resident.jail` |
+
+---
+
+## Viewing resident status
+
+```bash
+# View your own profile
+/res
+
+# View another player's profile
+/res Steve
+```
+
+The status screen shows your town, nation, registered date, friends, plot count, and active toggle states.
+
+---
+
+## Friend management
+
+Friends receive extra plot permissions when a resident sets their plot to allow friends.
+
+```bash
+# Add a friend
+/res friend add Steve
+
+# Remove a friend
+/res friend remove Steve
+
+# See your full friend list
+/res friend list
+
+# Remove all friends at once
+/res friend clear
+```
+
+---
+
+## Setting modes
+
+Modes change what information is displayed as you move around the world. Multiple modes can be active simultaneously.
+
+<AccordionGroup>
+  <Accordion title="Available modes">
+
+| Mode | Description |
+|---|---|
+| `map` | Continuously display the ASCII map. |
+| `plotborder` | Flash particles on plot borders when entered. |
+| `constantplotborder` | Always show plot border particles. |
+| `townborder` | Show the outer town perimeter only. |
+| `townclaim` | Highlight newly claimed/unclaimed land. |
+| `townunclaim` | Highlight unclaimed area on the map. |
+| `plotgroup` | Display plot group info on border cross. |
+| `district` | Display district info on border cross. |
+| `infotool` | Enable left-click info lookup tool. |
+
+  </Accordion>
+</AccordionGroup>
+
+```bash
+# Enable the map mode
+/res set mode map
+
+# Enable multiple modes
+/res set mode map plotborder
+
+# Clear all active modes
+/res set mode clear
+
+# Reset modes to defaults
+/res set mode reset
+```
+
+---
+
+## Toggle flags
+
+Toggles set the default behaviour for resident-owned plots. Individual plots can override these using `/plot toggle`.
+
+```bash
+# Prevent explosions on your plots
+/res toggle explosion
+
+# Explicitly turn fire spread off
+/res toggle fire off
+
+# Re-enable mob spawning
+/res toggle mobs on
+
+# Disable PvP on your plots
+/res toggle pvp off
+```
+
+---
+
+## Jail bail
+
+If you are jailed in a town that allows bail payments, you can pay your way out.
+
+<Note>
+The bail amount is configured per town. You must have sufficient funds in your personal economy account.
+</Note>
+
+```bash
+/res jail paybail
+```
+
+---
+
+## Plot list and taxes
+
+```bash
+# See all plots you own (paginated)
+/res plotlist
+
+# See plots owned by another resident
+/res plotlist Steve
+
+# View the taxes charged on your plots
+/res tax
+```

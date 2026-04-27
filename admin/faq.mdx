@@ -1,0 +1,232 @@
+---
+title: "Frequently asked questions about Towny"
+description: "Answers to common Towny questions covering platform requirements, bonus blocks, upkeep, town merging, outposts, economy plugins, and the jail system."
+---
+
+This page answers the questions that come up most often in the Towny Discord and GitHub discussions. If your question is not answered here, check the [Troubleshooting](/admin/troubleshooting) page or the [Command Reference](/commands/townyadmin).
+
+<AccordionGroup>
+  <Accordion title="Does Towny work on Spigot?">
+    No. As of **Towny 0.102.0.0**, Spigot and CraftBukkit are no longer supported. You must run **Paper**, **Purpur**, or **Folia**.
+
+    If you are currently on Spigot, migrating to Paper is straightforward — Paper is a drop-in replacement. Download it from [papermc.io](https://papermc.io) and replace your server jar. Your world and plugin data are fully compatible.
+  </Accordion>
+
+  <Accordion title="How do I give players a starting amount of bonus blocks?">
+    Bonus blocks are extra town-block capacity beyond what a town earns through residents. You can grant them to all new towns automatically via `config.yml`:
+
+    ```yaml
+    # The number of town blocks a brand-new town starts with, in addition to the default formula
+    town_starting_townblocks: 0
+    ```
+
+    To give bonus blocks to an existing town:
+
+    ```
+    /ta givebonus <town> <amount>
+    ```
+
+    Requires `towny.command.townyadmin.givebonus`.
+
+    You can also award bonus blocks to residents (which count toward their town's total) via `config.yml`'s `resident_can_have_bonus_blocks_in_multiple_towns` setting.
+  </Accordion>
+
+  <Accordion title="How do I prevent town deletion when upkeep fails?">
+    By default Towny can delete towns that fall into debt and stay there. This behavior is controlled by two `config.yml` settings:
+
+    ```yaml
+    # Number of days a town can remain in debt before being deleted (0 = never delete)
+    days_before_debt_deletion: 0
+    ```
+
+    Set `days_before_debt_deletion` to `0` to disable automatic deletion entirely.
+
+    Alternatively, enable the **Ruined Town** system so that bankrupt towns become ruins rather than being deleted outright — residents can later reclaim the ruins to restore the town.
+  </Accordion>
+
+  <Accordion title="Can two towns merge into one?">
+    Yes. A mayor can propose a merge with:
+
+    ```
+    /town merge <other town>
+    ```
+
+    The mayor of the target town must accept the merge. The smaller town is absorbed into the larger one (the town with more town blocks becomes the surviving town). All plots, residents, and the bank balance of the absorbed town are transferred.
+
+    Admins can force a merge without consent:
+
+    ```
+    /ta town forcemerge <town1> <town2>
+    ```
+
+    Requires `towny.command.townyadmin.town.forcemerge`.
+  </Accordion>
+
+  <Accordion title="How do I set up a nation capital?">
+    When a nation is first created, the founding town becomes the capital automatically. The king can change the capital to any member town with:
+
+    ```
+    /nation set capital <town>
+    ```
+
+    Requires `towny.command.nation.set.capital`.
+
+    Admins can override the capital with:
+
+    ```
+    /ta set capital <nation> <town>
+    ```
+
+    The capital's town spawn becomes the nation spawn unless a separate nation spawn has been set with `/nation set spawn`.
+  </Accordion>
+
+  <Accordion title="What is a Ruined Town?">
+    A Ruined Town is a town that has gone bankrupt (its bank balance reached zero and upkeep could not be paid) but has **not** been fully deleted. Instead of removing all data, Towny marks the town as ruined.
+
+    Ruined towns:
+    - No longer protect their land (anyone can build in plots)
+    - Cannot perform most town actions
+    - Can be reclaimed by any player standing in the homeblock using `/town reclaim`
+
+    Reclaiming costs a configurable amount and restores the town with its original name and plots. The ruin system is controlled by `config.yml` settings prefixed with `ruined_town_`.
+
+    Admins can restore a ruined town directly with:
+
+    ```
+    /ta town unruin <town>
+    ```
+  </Accordion>
+
+  <Accordion title="Can players build in the wilderness?">
+    By default, unclaimed wilderness areas are protected — only players with `towny.wild.*` (or `towny.admin`) can build there. You can change wilderness permissions per world using:
+
+    ```
+    /tw set wildperm build destroy switch itemuse
+    ```
+
+    Include only the actions you want to allow. For example, to allow everyone to build and destroy in the wilderness:
+
+    ```
+    /tw set wildperm build destroy
+    ```
+
+    You can also toggle all wilderness permissions at once with:
+
+    ```
+    /tw toggle wildernessuse on
+    ```
+
+    Which sets all four permissions (build, destroy, switch, itemuse) simultaneously.
+  </Accordion>
+
+  <Accordion title="How do outposts work?">
+    Outposts are secondary claimed areas that belong to a town but are not connected to the main town body. A mayor can claim an outpost by standing in an unclaimed chunk and running:
+
+    ```
+    /town claim outpost
+    ```
+
+    Requirements:
+    - The town must have at least one available town block
+    - The town must have sufficient funds if `price_claim_townblock_outpost` is set in `config.yml`
+    - Players need the permission `towny.command.town.claim.outpost`
+
+    Each outpost gets its own spawn point (set with `/town set outpost`). Residents can teleport to outposts with `/town spawn outpost <number>`.
+
+    Outpost land is protected the same as regular town land.
+  </Accordion>
+
+  <Accordion title="What happens when a mayor leaves their town?">
+    When a mayor runs `/town leave` or is kicked, Towny automatically handles the succession:
+
+    1. If the town has an **assistant**, the first-listed assistant is promoted to mayor.
+    2. If there are no assistants, the **longest-standing resident** (by join date) is promoted.
+    3. If the mayor is the **only resident**, the town is deleted (unless `min_residents_to_delete_town` prevents it).
+
+    Admins can manually transfer the mayor role at any time:
+
+    ```
+    /ta set mayor <town> <player>
+    ```
+
+    Requires `towny.command.townyadmin.set.mayor`.
+  </Accordion>
+
+  <Accordion title="How do I add Towny to my plugin using the API?">
+    Add Towny as a dependency via JitPack. In your Maven `pom.xml`:
+
+    ```xml
+    <repositories>
+      <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+      </repository>
+    </repositories>
+
+    <dependencies>
+      <dependency>
+        <groupId>com.github.TownyAdvanced</groupId>
+        <artifactId>Towny</artifactId>
+        <version>0.102.0.0</version>
+        <scope>provided</scope>
+      </dependency>
+    </dependencies>
+    ```
+
+    Declare Towny as a soft-dependency in `plugin.yml`:
+
+    ```yaml
+    softdepend: [Towny]
+    ```
+
+    Then access the API:
+
+    ```java
+    TownyAPI api = TownyAPI.getInstance();
+    Town town = api.getTown(player);
+    ```
+
+    See the full [Developer API](/api/overview) documentation for details on objects, events, and metadata.
+  </Accordion>
+
+  <Accordion title="What economy plugins work with Towny?">
+    Towny integrates with any economy plugin that exposes a **Vault** API. Commonly used options include:
+
+    - **EssentialsX** (with the built-in economy module)
+    - **CMI** (with economy enabled)
+    - **iConomy** (LlmDl's maintained fork, iConomy5)
+    - **TheNewEconomy (TNE)**
+
+    Towny lists `Vault` and `Reserve` as soft dependencies in `plugin.yml`. If neither is detected, economy-dependent features (town creation costs, upkeep, taxes, plot prices) will not function.
+
+    After installing an economy plugin, restart the server and run `/ta eco info` to confirm Towny has hooked into it.
+  </Accordion>
+
+  <Accordion title="How does the jail system work?">
+    Towny's jail system allows mayors and designated sheriffs to imprison players inside jail plots.
+
+    **Setting up a jail:**
+    1. Create a plot and set its type: `/plot set jail`
+    2. Add jail cells within the plot: `/plot jailcell add`
+    3. Set the town's primary jail: `/town set primaryjail <jail plot name>`
+
+    **Jailing a player:**
+    ```
+    /town jail <player> [jail] [cell] [hours]
+    ```
+
+    A jailed player is teleported to the jail cell and cannot leave the jail plot until released or their sentence expires.
+
+    **Releasing a player:**
+    ```
+    /town unjail <player>
+    ```
+
+    The `jailing` system must be enabled for the world via `/tw toggle jailing on`. The permission node `towny.outlaw.jailer` is required to jail outlaws killed in a town (granted in `townyperms.yml` to mayors, assistants, and sheriffs by default).
+
+    Admins can unjail any player with:
+    ```
+    /ta resident unjail <player>
+    ```
+  </Accordion>
+</AccordionGroup>

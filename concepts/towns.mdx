@@ -1,0 +1,166 @@
+---
+title: "Towns: founding, claiming land, and managing residents"
+description: "Towns are the core unit of Towny. A mayor founds a town, claims land as TownBlocks, manages a bank, and governs residents through ranks, toggles, and plot types."
+---
+
+A **Town** is a collection of claimed land (TownBlocks) and the residents who live on it. Every town has a **Mayor** — the player responsible for managing claims, the town bank, resident ranks, and town-wide settings. Towns can exist independently or join a [Nation](/concepts/nations).
+
+## TownBlocks and the chunk grid
+
+Towny's land system is chunk-based. Each **TownBlock** is one Minecraft chunk (16 × 16 blocks, full world height). Claims always align to chunk boundaries — you cannot claim a partial chunk.
+
+```bash
+# Claim the chunk you are standing in
+/town claim
+
+# Unclaim the chunk you are standing in
+/town unclaim
+```
+
+A town's total claimable chunks is determined by its **town level** (resident count) plus any **bonus blocks** granted by the server or purchased. The mayor can see the current claim count with `/town`.
+
+<Note>
+TownBlocks must be adjacent to an already-claimed chunk (or the homeblock) unless the server has disabled the contiguous-claim requirement. Outposts are an exception — see below.
+</Note>
+
+## Town bank
+
+Every town has a bank account. The bank pays for upkeep, daily taxes collected from residents, and any economy-linked actions the server configures.
+
+```bash
+/town deposit <amount>
+/town withdraw <amount>
+/town bankhistory
+```
+
+**How money flows in and out:**
+
+| Direction | Source |
+|---|---|
+| In | Resident deposits, plot taxes, and town taxes paid to the town |
+| Out | Daily upkeep costs, mayor withdrawals, bonus block purchases |
+
+<Warning>
+If the town bank cannot cover the daily upkeep cost, the town enters a **ruined** state. See the ruined towns section below.
+</Warning>
+
+## Plot types
+
+Each TownBlock has a **type** that changes what rules apply within it. The mayor or assistants set the type with `/plot set <type>`. For a full breakdown of every type and its permissions, see [Plot types and permissions](/concepts/plots).
+
+```bash
+/plot set default
+/plot set shop
+/plot set embassy
+/plot set arena
+/plot set wilds
+/plot set inn
+/plot set jail
+/plot set farm
+/plot set bank
+```
+
+## Town ranks
+
+The mayor can assign **ranks** to residents, granting them subsets of mayor-level permissions. Built-in ranks include `assistant`, but server administrators define the full set in `townyperms.yml`.
+
+```bash
+/town rank add <resident> <rank>
+/town rank remove <resident> <rank>
+/town ranklist
+```
+
+<AccordionGroup>
+  <Accordion title="Mayor">
+    Full control over the town. Can claim land, manage the bank, kick residents, set toggles, assign ranks, and delete the town.
+  </Accordion>
+  <Accordion title="Assistant">
+    A trusted rank with broad permissions, typically able to claim land, manage plots, and invite residents. Exact permissions are server-defined.
+  </Accordion>
+</AccordionGroup>
+
+If the mayor leaves or is removed, Towny automatically selects a successor from the highest available rank with eligible residents.
+
+## Town toggles
+
+Town-wide toggles control default behavior across all claimed land. The mayor changes them with `/town toggle <option>`.
+
+```bash
+/town toggle pvp
+/town toggle explosion
+/town toggle fire
+/town toggle mobs
+/town toggle open
+/town toggle public
+/town toggle neutral
+```
+
+| Toggle | Effect when ON |
+|---|---|
+| `pvp` | Enables player-versus-player combat across all town plots |
+| `explosion` | Allows explosion block damage in the town |
+| `fire` | Allows fire spread in the town |
+| `mobs` | Allows hostile mob spawning in the town |
+| `open` | Lets any player join the town without an invite |
+| `public` | Makes the town spawn accessible via `/t spawn <name>` to outsiders |
+| `neutral` | Opts the town out of nation wars (may cost extra upkeep) |
+
+Individual plots can override these defaults — see [Plot types and permissions](/concepts/plots).
+
+## Outposts
+
+An **outpost** is a claimed chunk that is not physically connected to the rest of the town's territory. Outposts let towns stake a presence in a distant location.
+
+```bash
+# Claim the current chunk as a new outpost
+/town claim outpost
+
+# Teleport to a numbered outpost
+/town outpost <number>
+
+# List all outposts
+/town outpost list
+```
+
+Each outpost has its own spawn point set at the time of claiming. The number of outposts a town may own is typically controlled by the server configuration or town level.
+
+## Town levels and bonus blocks
+
+As a town gains residents, it advances through **town levels** defined by the server administrator. Each level increases the maximum number of claimable TownBlocks and may unlock other benefits such as outpost slots.
+
+Beyond level-based blocks, towns can receive additional claims through:
+
+- **Admin bonus blocks** — granted by a server operator with `/ta town bonus <town> <amount>`
+- **Purchased bonus blocks** — bought from the town bank with `/town buy bonus <amount>`
+
+```bash
+# See how many blocks your town has and can claim
+/town
+```
+
+## Ruined towns
+
+When a town's bank balance falls below the daily **upkeep** cost and the balance reaches zero, the town becomes **ruined**. A ruined town retains its land claims temporarily but residents lose normal protections.
+
+- Ruined towns appear differently on the map
+- They can be reclaimed or will eventually be deleted if not recovered
+- The `ruinedTime` field records when the ruin started
+
+To recover a ruined town, deposit enough currency to cover the outstanding debt:
+
+```bash
+/town deposit <amount>
+```
+
+## Merging towns
+
+Two towns can be **merged** into one. The town being merged into the other is dissolved and its TownBlocks, residents, and bank balance transfer to the receiving town.
+
+```bash
+# Admin command to merge town A into town B
+/ta town merge <townA> <townB>
+```
+
+<Warning>
+Merging is irreversible. The dissolved town ceases to exist and its name is freed. Make sure both mayors agree before an admin performs the merge.
+</Warning>

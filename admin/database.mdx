@@ -1,0 +1,146 @@
+---
+title: "Database setup: FlatFile and SQL backends"
+description: "Configure Towny's data storage using the default FlatFile backend or a MySQL database. Learn how to connect, migrate, and back up your data safely."
+---
+
+Towny stores all of its data — residents, towns, nations, and world settings — through one of two configurable backends: **FlatFile** (the default, plain-text storage) and **SQL** (MySQL via a HikariCP connection pool). Both are configured in `plugins/Towny/settings/database.yml`.
+
+## FlatFile backend
+
+FlatFile is the default backend and requires no external database software. All data is written as text files inside `plugins/Towny/data/`:
+
+```
+plugins/Towny/
+└── data/
+    ├── residents/
+    ├── towns/
+    ├── nations/
+    ├── worlds/
+    ├── townblocks/
+    └── plot-block-data/
+```
+
+Each object (resident, town, nation, etc.) is stored as an individual file named by its UUID. This makes manual inspection and recovery straightforward.
+
+<Tip>
+FlatFile is recommended for most servers. It has no external dependencies and performs well for servers with up to several hundred towns.
+</Tip>
+
+### Backing up FlatFile data
+
+Run a manual backup at any time with:
+
+```
+/ta backup
+```
+
+Towny also performs an automatic backup once per new day (configured by the server's new-day interval). Backups are written to `plugins/Towny/backups/`.
+
+## SQL backend
+
+The SQL backend stores all Towny objects in a MySQL database using a configurable table prefix. Towny uses [HikariCP](https://github.com/brettwooldridge/HikariCP) for connection pooling.
+
+### Connection settings
+
+All SQL settings live under `database.sql` in `plugins/Towny/settings/database.yml`:
+
+| Key | Default | Description |
+|---|---|---|
+| `hostname` | `localhost` | Database server hostname or IP |
+| `port` | `3306` | Database server port |
+| `dbname` | `towny` | Name of the database to use |
+| `table_prefix` | `towny_` | Prefix for all Towny tables |
+| `username` | `root` | Database username |
+| `password` | _(empty)_ | Database password |
+| `flags` | `?verifyServerCertificate=false&useSSL=false&useUnicode=true&characterEncoding=utf-8` | JDBC connection flags appended to the URL |
+
+### Connection pool settings
+
+The pool settings under `database.sql.pooling` should not normally need adjustment. If you experience connection saturation on large servers, you may increase `max_pool_size`:
+
+| Key | Default | Description |
+|---|---|---|
+| `max_pool_size` | `5` | Maximum simultaneous database connections |
+| `max_lifetime` | `180000` | Maximum connection lifetime in milliseconds |
+| `connection_timeout` | `5000` | Timeout before a connection attempt fails (ms) |
+
+<Note>
+When using the SQL backend, Towny's `/ta backup` command backs up FlatFile-format copies of your data, not the SQL database itself. Configure your own database backup solution and set `database.sql.disable_backup_warning` to `true` once you have done so.
+</Note>
+
+### Database migration command
+
+Towny provides an admin command to convert between backends:
+
+```
+/ta database [convert]
+```
+
+Use `/ta database` to inspect the current backend status. The `convert` subcommand migrates all data from the current backend to the other one.
+
+Requires the permission node `towny.command.townyadmin.database`.
+
+## Switching from FlatFile to SQL
+
+<Warning>
+Always back up your data before changing backends. A failed or interrupted migration can leave your data in an inconsistent state.
+</Warning>
+
+<Steps>
+  <Step title="Back up your current data">
+    Run `/ta backup` in-game or from the console. Confirm the backup appears in `plugins/Towny/backups/`.
+  </Step>
+  <Step title="Create the SQL database">
+    On your MySQL server, create an empty database:
+
+    ```sql
+    CREATE DATABASE towny CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    ```
+
+    Create a dedicated user and grant it access:
+
+    ```sql
+    CREATE USER 'towny_user'@'localhost' IDENTIFIED BY 'secure_password';
+    GRANT ALL PRIVILEGES ON towny.* TO 'towny_user'@'localhost';
+    FLUSH PRIVILEGES;
+    ```
+  </Step>
+  <Step title="Edit database.yml">
+    Open `plugins/Towny/settings/database.yml` and set both load and save values to `mysql`, then fill in your connection details:
+
+    ```yaml
+    database:
+      database_load: mysql
+      database_save: mysql
+      sql:
+        hostname: localhost
+        port: 3306
+        dbname: towny
+        table_prefix: towny_
+        username: towny_user
+        password: secure_password
+    ```
+  </Step>
+  <Step title="Migrate the data">
+    With the plugin still running on FlatFile, run:
+
+    ```
+    /ta database convert
+    ```
+
+    Towny will copy all FlatFile data into the SQL database. Watch the console for errors.
+  </Step>
+  <Step title="Reload Towny">
+    After migration completes, reload:
+
+    ```
+    /ta reload
+    ```
+
+    Towny will now load and save all data through MySQL.
+  </Step>
+</Steps>
+
+## Switching back to FlatFile
+
+The reverse process is the same: back up, change `database_load` and `database_save` back to `flatfile`, run `/ta database convert`, then `/ta reload`.

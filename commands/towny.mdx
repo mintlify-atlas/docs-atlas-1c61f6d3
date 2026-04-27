@@ -1,0 +1,128 @@
+---
+title: "Towny command reference (/towny) — map, top, universe"
+description: "Reference for the /towny base command — view the map, check prices, spy on channels, inspect server time, browse top lists, and display version info."
+---
+
+The `/towny` command provides server-wide information utilities. Unlike `/town` or `/nation`, these subcommands are read-only diagnostics — no data is modified. They are useful for players checking the state of the server and for administrators monitoring activity.
+
+<Note>
+Permission nodes follow the pattern `towny.command.towny.<subcommand>`. The full wildcard `towny.command.towny.*` grants access to all subcommands listed here.
+</Note>
+
+## Subcommand overview
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/towny ?` | Display the help page. | *(any player)* |
+| `/towny map` | Display an ASCII map of the area around you. | `towny.command.towny.map` |
+| `/towny prices` | Show the configured prices for town actions. | `towny.command.towny.prices` |
+| `/towny spy` | Toggle global chat spy mode (see all channels). | `towny.command.towny.spy` |
+| `/towny time` | Show the time until the next new day. | `towny.command.towny.time` |
+| `/towny top residents [all\|town\|nation]` | List towns or nations by resident count. | `towny.command.towny.top.residents` |
+| `/towny top land [all\|resident\|town]` | List towns or residents by land area. | `towny.command.towny.top.land` |
+| `/towny top balance [all\|town\|nation]` | List towns or nations by bank balance. | `towny.command.towny.top.balance` |
+| `/towny tree` | Display the Towny object hierarchy as a tree. | `towny.command.towny.tree` |
+| `/towny universe` | Show global statistics for the whole server. | `towny.command.towny.universe` |
+| `/towny version` | Display the installed Towny version. | `towny.command.towny.version` |
+| `/towny switches` | List which switch materials are tracked. | *(any player)* |
+| `/towny itemuse` | List which item-use materials are tracked. | *(any player)* |
+| `/towny allowedblocks` | List blocks allowed in the wilderness. | *(any player)* |
+| `/towny wildsblocks` | Show the wilds-use block list. | *(any player)* |
+| `/towny plotclearblocks` | Show the blocks removed by `/plot clear`. | *(any player)* |
+
+---
+
+## Map
+
+The map renders an ASCII representation of nearby town claims in your chat window. Each character represents one chunk; the legend shows which colours correspond to which towns and nations.
+
+```bash
+/towny map
+```
+
+<Tip>
+Enable the persistent map with `/res toggle map` so it redraws automatically as you walk.
+</Tip>
+
+---
+
+## Prices
+
+Displays the current economy costs configured by the server admin — including the cost to found a town, claim a chunk, create a nation, and more.
+
+```bash
+/towny prices
+```
+
+---
+
+## Spy mode
+
+When spy mode is active, all messages sent through Towny's town, nation, and ally chat channels are echoed to you in the main chat. Requires the `towny.command.towny.spy` permission node, which is not granted by default.
+
+```bash
+/towny spy
+```
+
+---
+
+## Server time
+
+Shows the real-time countdown until Towny's next "new day" event fires. The new-day event is when taxes are collected, upkeep is charged, and various scheduled tasks run.
+
+```bash
+/towny time
+```
+
+---
+
+## Top lists
+
+The `top` subcommand provides sorted leaderboards. Combine a category (`residents`, `land`, `balance`) with an optional scope.
+
+```bash
+# Top towns by resident count
+/towny top residents town
+
+# Top nations by resident count
+/towny top residents nation
+
+# Top residents by land area
+/towny top land resident
+
+# Top towns by land area
+/towny top land town
+
+# Top towns by bank balance
+/towny top balance town
+
+# Top nations by bank balance
+/towny top balance nation
+
+# All results combined
+/towny top balance all
+```
+
+---
+
+## Universe statistics
+
+Displays global server statistics including the total number of residents, towns, nations, claimed town blocks, and economy totals.
+
+```bash
+/towny universe
+```
+
+---
+
+## Version and tree
+
+```bash
+# Show the installed Towny build version
+/towny version
+
+# Display the Towny object hierarchy tree
+/towny tree
+```
+
+The `tree` output is primarily a debugging aid that shows the internal structure of loaded Towny objects, which can be useful when diagnosing issues.

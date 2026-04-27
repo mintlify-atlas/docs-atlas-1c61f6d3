@@ -1,0 +1,343 @@
+---
+title: "Town command reference (/town, /t)"
+description: "Complete reference for /town and its alias /t — create towns, claim land, manage residents, set taxes and permissions, handle jails, and configure diplomacy."
+---
+
+The town commands are the primary tool for creating and managing player-owned towns. Every town action — from founding a settlement and claiming new land, to setting taxes and jailing outlaws — is available through `/town` or its alias `/t`.
+
+<Note>
+Most subcommands require you to be a resident of a town, and many require the Mayor or Assistant rank. Permission nodes follow the pattern `towny.command.town.<subcommand>`.
+</Note>
+
+## Subcommand overview
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/town` | View your own town status. | *(member)* |
+| `/town <name>` | View another town's status. | `towny.command.town.othertown` |
+| `/town new <name>` | Found a new town at your location. | `towny.command.town.new` |
+| `/town add <player>` | Invite a player to your town. | `towny.command.town.add` |
+| `/town invite <player>` | Send a join invite to a player. | `towny.command.town.invite.add` |
+| `/town invite sent` | List outgoing invites from your town. | `towny.command.town.invite.sent` |
+| `/town invite received` | List invites your town has received. | `towny.command.town.invite.received` |
+| `/town invite accept` | Accept a pending invite into a nation. | `towny.command.town.invite.accept` |
+| `/town invite deny` | Deny a pending invite into a nation. | `towny.command.town.invite.deny` |
+| `/town join <name>` | Join an open town. | `towny.command.town.join` |
+| `/town leave` | Leave your current town. | `towny.command.town.leave` |
+| `/town kick <player>` | Remove a resident from the town. | `towny.command.town.kick` |
+| `/town delete` | Permanently delete your town. | `towny.command.town.delete` |
+| `/town spawn` | Teleport to your town spawn. | `towny.town.spawn.town` |
+| `/town spawn <name>` | Teleport to another town's spawn (if public). | `towny.town.spawn.public` |
+| `/town claim` | Claim the chunk you are standing in. | `towny.command.town.claim.town` |
+| `/town claim outpost` | Claim an outpost at your location. | `towny.command.town.claim.outpost` |
+| `/town claim auto` | Auto-claim all adjacent available chunks. | `towny.command.town.claim.town.multiple` |
+| `/town claim circle <r>` | Claim chunks in a circle of radius r. | `towny.command.town.claim.town.multiple` |
+| `/town claim rect <r>` | Claim chunks in a rectangle of radius r. | `towny.command.town.claim.town.multiple` |
+| `/town claim fill` | Fill-claim from your current position. | `towny.command.town.claim.fill` |
+| `/town unclaim` | Unclaim the chunk you are standing in. | `towny.command.town.unclaim` |
+| `/town unclaim all` | Unclaim all town chunks. | `towny.command.town.unclaim.all` |
+| `/town unclaim circle <r>` | Unclaim in a circle of radius r. | `towny.command.town.unclaim` |
+| `/town unclaim rect <r>` | Unclaim in a rectangle of radius r. | `towny.command.town.unclaim` |
+| `/town deposit <amount>` | Deposit money into the town bank. | `towny.command.town.deposit` |
+| `/town withdraw <amount>` | Withdraw money from the town bank. | `towny.command.town.withdraw` |
+| `/town buy bonus <amount>` | Purchase extra town blocks. | `towny.command.town.buy.bonus` |
+| `/town buytown <name>` | Buy a town that is for sale. | `towny.command.town.buytown` |
+| `/town forsale <price>` | Put the town up for sale. | `towny.command.town.forsale` |
+| `/town notforsale` | Remove the town from the market. | `towny.command.town.notforsale` |
+| `/town rank add <player> <rank>` | Grant a resident a named rank. | `towny.command.town.rank.*` |
+| `/town rank remove <player> <rank>` | Remove a named rank from a resident. | `towny.command.town.rank.*` |
+| `/town ranklist` | List all ranks and rank holders. | `towny.command.town.ranklist` |
+| `/town set board <msg>` | Set the town message of the day. | `towny.command.town.set.board` |
+| `/town set homeblock` | Set the homeblock to your current chunk. | `towny.command.town.set.homeblock` |
+| `/town set spawn` | Set the town spawn to your location. | `towny.command.town.set.spawn` |
+| `/town set mayor <player>` | Transfer mayor status to another resident. | `towny.command.town.set.mayor` |
+| `/town set name <name>` | Rename the town. | `towny.command.town.set.name` |
+| `/town set tag <tag>` | Set a short tag for the town (3-4 chars). | `towny.command.town.set.tag` |
+| `/town set perm <flags>` | Set town-wide plot permission flags. | `towny.command.town.set.perm` |
+| `/town set taxes <amount>` | Set the daily flat tax for residents. | `towny.command.town.set.taxes` |
+| `/town set plottax <amount>` | Set the daily tax per resident-owned plot. | `towny.command.town.set.plottax` |
+| `/town set plotprice <price>` | Set the default price for plots for sale. | `towny.command.town.set.plotprice` |
+| `/town set shopprice <price>` | Set the purchase price for shop plots. | `towny.command.town.set.shopprice` |
+| `/town set shoptax <amount>` | Set the daily tax for shop plots. | `towny.command.town.set.shoptax` |
+| `/town set embassyprice <price>` | Set the purchase price for embassy plots. | `towny.command.town.set.embassyprice` |
+| `/town set embassytax <amount>` | Set the daily tax for embassy plots. | `towny.command.town.set.embassytax` |
+| `/town set spawncost <amount>` | Set the cost to spawn to this town. | `towny.command.town.set.spawncost` |
+| `/town set mapcolor <color>` | Set the town's color on Dynmap. | `towny.command.town.set.mapcolor` |
+| `/town set title <player> <title>` | Set a custom title for a resident. | `towny.command.town.set.title` |
+| `/town set surname <player> <name>` | Set a custom surname for a resident. | `towny.command.town.set.surname` |
+| `/town set primaryjail <jail>` | Set the primary jail for the town. | `towny.command.town.set.primaryjail` |
+| `/town set taxpercentcap <n>` | Cap the maximum tax-percent amount. | `towny.command.town.set.taxpercentcap` |
+| `/town set outpost <number>` | Set the spawn of the numbered outpost. | `towny.command.town.set.outpost` |
+| `/town set jail <number>` | Set the location of a jail cell. | `towny.command.town.set.jail` |
+| `/town toggle explosion` | Toggle explosion damage in the town. | `towny.command.town.toggle.explosion` |
+| `/town toggle fire` | Toggle fire spread in the town. | `towny.command.town.toggle.fire` |
+| `/town toggle mobs` | Toggle hostile mob spawning in the town. | `towny.command.town.toggle.mobs` |
+| `/town toggle pvp` | Toggle PvP in the town. | `towny.command.town.toggle.pvp` |
+| `/town toggle open` | Toggle whether anyone can join. | `towny.command.town.toggle.open` |
+| `/town toggle public` | Toggle whether the spawn is public. | `towny.command.town.toggle.public` |
+| `/town toggle neutral` | Toggle paying for neutrality in wars. | `towny.command.town.toggle.neutral` |
+| `/town toggle taxpercent` | Toggle taxes as a percentage of balance. | `towny.command.town.toggle.taxpercent` |
+| `/town toggle nationzone` | Toggle nation zone around the town. | `towny.command.town.toggle.nationzone` |
+| `/town outpost <number>` | Teleport to an outpost. | `towny.town.spawn.outpost` |
+| `/town outpost list` | List all town outposts. | `towny.command.town.outpost.list` |
+| `/town outlaw add <player>` | Add a player to the town outlaw list. | `towny.command.town.outlaw` |
+| `/town outlaw remove <player>` | Remove a player from the outlaw list. | `towny.command.town.outlaw` |
+| `/town outlawlist` | List all town outlaws. | `towny.command.town.outlaw` |
+| `/town jail <player> [cell] [days]` | Jail a resident in a town cell. | `towny.command.town.jail` |
+| `/town jail list` | List jail cells in the town. | `towny.command.town.jail.list` |
+| `/town unjail <player>` | Release a jailed resident. | `towny.command.town.unjail` |
+| `/town online` | List online residents of the town. | `towny.command.town.online` |
+| `/town reslist` | List all residents of the town. | `towny.command.town.reslist` |
+| `/town plotgrouplist` | List all plot groups in the town. | `towny.command.town.plotgrouplist` |
+| `/town plots` | Show plot usage statistics. | `towny.command.town.plots` |
+| `/town list` | List all towns (sorted by residents). | `towny.command.town.list` |
+| `/town list <sort>` | List towns sorted by a specific field. | `towny.command.town.list.*` |
+| `/town here` | Show information about the town at your location. | `towny.command.town.here` |
+| `/town nearby <distance>` | List towns within a block radius. | `towny.command.town.nearby` |
+| `/town merge <town>` | Merge another town into yours. | `towny.command.town.merge` |
+| `/town bankhistory [pages]` | View the town bank transaction history. | `towny.command.town.bankhistory` |
+| `/town trust add <player>` | Add a trusted resident (all-access). | `towny.command.town.trust` |
+| `/town trust remove <player>` | Remove a trusted resident. | `towny.command.town.trust` |
+| `/town trusttown add <town>` | Trust all residents of another town. | `towny.command.town.trusttown` |
+| `/town trusttown remove <town>` | Remove trust from another town. | `towny.command.town.trusttown` |
+| `/town allylist` | List towns in the same allied nation. | `towny.command.town.allylist` |
+| `/town enemylist` | List towns in enemy nations. | `towny.command.town.enemylist` |
+| `/town say <message>` | Send a message to all online residents. | `towny.command.town.say` |
+| `/town reclaim` | Reclaim a ruined town as its former mayor. | `towny.command.town.reclaim` |
+| `/town mayor` | Show help for mayor-specific commands. | `towny.command.town.mayor` |
+| `/town purge` | Remove offline residents below a threshold. | `towny.command.town.purge` |
+
+---
+
+## Creating and joining towns
+
+<Warning>
+Creating a town costs money (configured by the admin). Once deleted, a town and all its claim data are permanently removed.
+</Warning>
+
+```bash
+# Found a new town named Riverdale
+/town new Riverdale
+
+# Join an open town
+/town join Riverdale
+
+# Invite a player to join your town
+/town invite Steve
+
+# Accept an invite to join a nation
+/town invite accept
+
+# Leave your current town
+/town leave
+```
+
+---
+
+## Claiming land
+
+<Note>
+The number of chunks you can claim is determined by the town level, bought bonus blocks, and server configuration.
+</Note>
+
+```bash
+# Claim the chunk you are standing in
+/town claim
+
+# Claim the adjacent unfilled area automatically
+/town claim auto
+
+# Claim a 3-chunk circle around you
+/town claim circle 3
+
+# Claim a 2-chunk rectangle around you
+/town claim rect 2
+
+# Fill-claim all contiguous reachable chunks
+/town claim fill
+
+# Claim a new outpost at your location
+/town claim outpost
+
+# Unclaim the current chunk
+/town unclaim
+
+# Unclaim all town land (destructive)
+/town unclaim all
+```
+
+---
+
+## Town bank
+
+```bash
+# Deposit 500 into the town bank
+/town deposit 500
+
+# Withdraw 200 from the town bank (mayor only)
+/town withdraw 200
+
+# View the last 10 transactions
+/town bankhistory
+
+# Purchase 10 extra town blocks
+/town buy bonus 10
+```
+
+---
+
+## Ranks and residents
+
+<AccordionGroup>
+  <Accordion title="Built-in ranks">
+    Towny ships with a default set of ranks defined in `townyperms.yml`. Common default ranks include **Assistant**, **Sheriff**, and **Builder**. Admins can add custom ranks in that file.
+  </Accordion>
+</AccordionGroup>
+
+```bash
+# Grant Steve the Assistant rank
+/town rank add Steve Assistant
+
+# Remove the rank
+/town rank remove Steve Assistant
+
+# See all ranked residents
+/town ranklist
+
+# List all town members
+/town reslist
+
+# List online members only
+/town online
+```
+
+---
+
+## Town settings (`/town set`)
+
+```bash
+# Set the message-of-the-day board
+/town set board Welcome to Riverdale!
+
+# Move the homeblock to your current chunk
+/town set homeblock
+
+# Move the spawn point to your feet
+/town set spawn
+
+# Rename the town
+/town set name Springfield
+
+# Set a 4-character town tag
+/town set tag SPFD
+
+# Set flat daily resident tax
+/town set taxes 10
+
+# Set the per-plot daily tax
+/town set plottax 2
+
+# Set default plot sale price
+/town set plotprice 50
+```
+
+---
+
+## Town toggles
+
+```bash
+# Allow explosions in the town
+/town toggle explosion on
+
+# Disable fire spread
+/town toggle fire off
+
+# Enable PvP across the whole town
+/town toggle pvp on
+
+# Make the town open (anyone can join)
+/town toggle open
+
+# Make the town spawn publicly accessible
+/town toggle public
+```
+
+---
+
+## Outlaws and jail
+
+```bash
+# Outlaw a player
+/town outlaw add Griefer123
+
+# Remove them from the outlaw list
+/town outlaw remove Griefer123
+
+# Jail a resident in cell 1 for 2 days
+/town jail Steve 1 2
+
+# Release a jailed resident
+/town unjail Steve
+
+# List jail cells
+/town jail list
+```
+
+---
+
+## Outposts
+
+Outposts are non-contiguous claims placed anywhere in the world.
+
+```bash
+# Teleport to outpost 1
+/town outpost 1
+
+# List all outposts
+/town outpost list
+
+# Set the spawn location of outpost 1 (stand at new spawn first)
+/town set outpost 1
+```
+
+---
+
+## Buying and selling towns
+
+<Warning>
+Selling a town transfers full ownership to the buyer. This action cannot be undone.
+</Warning>
+
+```bash
+# Put the town up for sale at 5000
+/town forsale 5000
+
+# Remove from sale
+/town notforsale
+
+# Buy a town that is listed for sale
+/town buytown Riverdale
+```
+
+---
+
+## Listing and discovery
+
+```bash
+# List all towns, sorted by residents (default)
+/town list
+
+# Sort by balance
+/town list balance
+
+# Sort by number of town blocks
+/town list townblocks
+
+# Other sort options: name, online, open, public, founded, ruined, bankrupt, upkeep, forsale
+
+# Show info about the town at your location
+/town here
+
+# Find towns within 500 blocks
+/town nearby 500
+```

@@ -1,0 +1,121 @@
+---
+title: "Installing Towny on Paper, Purpur, or Folia"
+description: "Step-by-step guide to downloading, dropping in, and starting Towny Advanced on a Paper, Purpur, or Folia server running Java 17 or later."
+---
+
+Towny is a single JAR plugin with no mandatory dependencies. Once you meet the platform requirements, installation is as simple as placing the file in your `plugins/` folder and restarting your server.
+
+## Requirements
+
+Before installing, confirm your server meets the following requirements:
+
+| Requirement | Details |
+|---|---|
+| Server software | Paper, Purpur, or Folia |
+| Java | 17 or later |
+| Economy (optional) | Vault-compatible economy plugin (e.g. EssentialsX Economy) |
+
+<Note>
+As of Towny **0.102.0.0**, Spigot and CraftBukkit are no longer supported. If you are running either of those, you must migrate to Paper before installing Towny.
+</Note>
+
+## Supported Minecraft versions
+
+Use the table below to find the correct Towny version for your server's Minecraft version:
+
+| Minecraft version | Recommended Towny version |
+|---|---|
+| MC 1.21.x | [0.102.0.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.102.0.0) or latest pre-release |
+| MC 1.20.x | [0.102.0.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.102.0.0) or latest pre-release |
+| MC 1.19.x | [0.102.0.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.102.0.0) or latest pre-release |
+| MC 1.18.x | [0.100.3.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.100.3.0) |
+| MC 1.17.x | [0.100.3.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.100.3.0) |
+| MC 1.16.x | [0.100.3.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.100.3.0) |
+| MC 1.15.2 | [0.98.1.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.98.1.0) |
+| MC 1.14.4 | [0.98.1.0](https://github.com/TownyAdvanced/Towny/releases/tag/0.98.1.0) |
+| MC 1.13.2 | [0.96.2.0 for 1.13.2](https://github.com/TownyAdvanced/Towny/releases/tag/0.96.2.0for1.13.2) |
+| MC 1.12.2 | [0.97.0.0 for 1.12.2](https://github.com/TownyAdvanced/Towny/releases/tag/0.97.0.0for1.12.2) |
+
+## Installation
+
+<Steps>
+  <Step title="Download the Towny JAR">
+    Go to the [GitHub Releases page](https://github.com/TownyAdvanced/Towny/releases) and download the JAR for your Minecraft version.
+
+    - For a stable server, choose the latest **Release** build.
+    - For the newest Minecraft version or recent fixes, choose the latest **Pre-Release** build.
+  </Step>
+
+  <Step title="Place the JAR in your plugins folder">
+    Copy the downloaded `Towny-x.x.x.x.jar` into your server's `plugins/` directory.
+
+    ```
+    server/
+    └── plugins/
+        └── Towny-0.102.0.0.jar
+    ```
+  </Step>
+
+  <Step title="Install Vault (optional but recommended)">
+    If you want economy features — town banks, taxes, upkeep, plot pricing — install [Vault](https://github.com/MilkBowl/Vault/releases) alongside an economy plugin such as EssentialsX Economy. Place their JARs in `plugins/` as well.
+  </Step>
+
+  <Step title="Start (or restart) your server">
+    Start the server. Towny will generate its configuration files and folders automatically on first run.
+
+    ```bash
+    # example for a Paper server
+    java -Xms2G -Xmx4G -jar paper.jar --nogui
+    ```
+  </Step>
+
+  <Step title="Verify the installation">
+    Once the server is running, join and run:
+
+    ```bash
+    /towny version
+    ```
+
+    You should see Towny's version information printed to chat. You can also check your server console — Towny logs its startup output with the prefix `[Towny]`.
+  </Step>
+</Steps>
+
+## Files and folders Towny creates
+
+On first startup, Towny creates the following structure inside `plugins/`:
+
+```
+plugins/
+└── Towny/
+    ├── data/             # Town, nation, resident, and world data files
+    ├── logs/             # Daily log files
+    ├── settings/
+    │   ├── config.yml    # Main configuration file
+    │   ├── townyperms.yml  # Permission rank definitions
+    │   └── ...
+    └── backup/           # Automatic flat-file backups
+```
+
+<Tip>
+Review `config.yml` before players start building. Key settings such as new-town cost, claim prices, upkeep amounts, and which worlds Towny protects are all set there.
+</Tip>
+
+## Upgrading from an older version
+
+<Steps>
+  <Step title="Back up your data">
+    Copy the entire `plugins/Towny/` folder to a safe location before upgrading. Towny also creates automatic backups in `plugins/Towny/backup/`, but a manual copy is recommended.
+  </Step>
+
+  <Step title="Replace the JAR">
+    Stop your server, delete the old `Towny-x.x.x.x.jar` from `plugins/`, and place the new JAR in its place. Do **not** delete your `plugins/Towny/` data folder.
+  </Step>
+
+  <Step title="Start the server">
+    Start the server. Towny automatically migrates data files and configuration keys to match the new version. Watch the console for any `[Towny]` warnings or migration messages.
+  </Step>
+</Steps>
+
+<Warning>
+Always read the [changelog](https://github.com/TownyAdvanced/Towny/blob/master/Towny/src/main/resources/ChangeLog.txt) before upgrading, especially for major version bumps. Some upgrades change configuration keys or data formats in ways that require attention.
+</Warning>

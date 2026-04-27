@@ -1,23 +1,11 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
-  "name": "Towny Advanced",
+  "projectType": "general",
+  "projectName": "Towny Advanced",
+  "projectDescription": "A comprehensive Minecraft Bukkit/Paper plugin providing a resident-town-nation hierarchy with grid-based land protection, economy integration, and an expansive developer API.",
   "theme": "maple",
-  "colors": {
-    "primary": "#8d875b",
-    "light": "#c1bc96"
-  },
-  "favicon": "https://media.brand.dev/64fd0e6c-41b3-4ff3-8cdc-b3e638b87a96.png",
-  "navbar": {
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/TownyAdvanced/Towny"
-    }
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/TownyAdvanced/Towny"
-    }
-  },
+  "primaryColor": "#8d875b",
+  "lightColor": "#c1bc96",
+  "darkColor": null,
   "navigation": {
     "tabs": [
       {
@@ -94,5 +82,33 @@
         ]
       }
     ]
-  }
+  },
+  "keyFeatures": [
+    "Resident-Town-Nation hierarchy with grid-based land claim protection",
+    "Economy integration via Vault for town/nation banks, taxes, and upkeep",
+    "Granular permission system with townyperms.yml and LuckPerms/Vault support",
+    "Multiple plot types: Residential, Shop, Embassy, Arena, Farm, Inn, Jail, Wilds, Bank",
+    "FlatFile and MySQL/SQLite database backends",
+    "Developer API (TownyAPI) with events, metadata, and command addon system",
+    "Folia and Paper support",
+    "PlaceholderAPI integration",
+    "Outpost system, jailing, and outlaw management",
+    "Nation zones, allies, enemies, and diplomacy"
+  ],
+  "publicApiSurface": [
+    "TownyAPI",
+    "TownyUniverse",
+    "TownyCommandAddonAPI",
+    "TownBlockTypeHandler",
+    "CustomDataField",
+    "Resident",
+    "Town",
+    "Nation",
+    "TownBlock",
+    "TownyWorld",
+    "TownyPermission",
+    "Towny Events (NewTownEvent, TownClaimEvent, NationAddTownEvent, etc.)",
+    "TownyEconomyHandler",
+    "Translation / Translatable"
+  ]
 }

@@ -1,0 +1,222 @@
+---
+title: "Towny events: listening for in-game changes"
+description: "Categorised reference of Towny's Bukkit events, whether each is cancellable, and a code example showing how to listen with the @EventHandler annotation."
+---
+
+Towny fires standard Bukkit events for every major action — creating a town, claiming land, adding residents, performing bank transactions, and more. You listen to them exactly as you would any other Bukkit event: implement `Listener`, annotate a method with `@EventHandler`, and register your listener in `onEnable`.
+
+```java
+import com.palmergames.bukkit.towny.event.NewTownEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class TownyListener implements Listener {
+
+    @EventHandler
+    public void onNewTown(NewTownEvent event) {
+        Town town = event.getTown();
+        Bukkit.broadcastMessage("A new town was founded: " + town.getName());
+    }
+}
+```
+
+Register in your `onEnable`:
+
+```java
+getServer().getPluginManager().registerEvents(new TownyListener(), this);
+```
+
+<Note>
+Many Towny events run **asynchronously** (the class constructor passes `!Bukkit.getServer().isPrimaryThread()` to the super call). Never call synchronous Bukkit API methods — including `entity.teleport()` — from an async event handler without scheduling back to the main thread first.
+</Note>
+
+---
+
+## Town events
+
+All classes are in `com.palmergames.bukkit.towny.event` unless a sub-package is noted.
+
+| Event class | When it fires | Cancellable? |
+|-------------|---------------|:---:|
+| `PreNewTownEvent` | Before a town is created | Yes |
+| `NewTownEvent` | After a town is created | No |
+| `PreDeleteTownEvent` | Before a town is deleted | No |
+| `DeleteTownEvent` | After a town is deleted | No |
+| `RenameTownEvent` | After a town is renamed | No |
+| `TownPreRenameEvent` | Before a town is renamed | Yes |
+| `TownClaimEvent` | After a chunk is claimed by a town | No |
+| `TownPreClaimEvent` | Before a chunk is claimed | Yes |
+| `TownAddResidentEvent` | After a resident joins a town | No |
+| `TownPreAddResidentEvent` | Before a resident joins a town | Yes |
+| `TownRemoveResidentEvent` | After a resident leaves or is kicked | No |
+| `town.TownPreRemoveResidentEvent` | Before a resident leaves or is kicked | Yes |
+| `TownSpawnEvent` | When a player spawns to a town | Yes |
+| `town.TownKickEvent` | After a player is kicked from a town | No |
+| `town.TownLeaveEvent` | After a player leaves a town voluntarily | No |
+| `town.TownMayorChangedEvent` | After the mayor changes | No |
+| `town.TownMayorChangeEvent` | Before the mayor changes | Yes |
+| `town.TownMayorChosenBySuccessionEvent` | After succession selects a new mayor | No |
+| `town.TownMergeEvent` | After two towns merge | No |
+| `town.TownPreMergeEvent` | Before two towns merge | Yes |
+| `town.TownRuinedEvent` | After a town enters a ruined state | No |
+| `town.TownPreRuinedEvent` | Before a town enters a ruined state | Yes |
+| `town.TownReclaimedEvent` | After a ruined town is reclaimed | No |
+| `town.TownPreReclaimEvent` | Before a ruined town is reclaimed | Yes |
+| `town.TownUnclaimEvent` | After a chunk is unclaimed by a town | No |
+| `town.TownPreUnclaimEvent` | Before a chunk is unclaimed | Yes |
+| `town.TownConqueredEvent` | After a town is conquered in war | No |
+| `town.TownUnconquerEvent` | After a town is freed from conquest | No |
+| `town.TownSetSpawnEvent` | After a town sets its spawn point | No |
+| `town.TownSetOutpostSpawnEvent` | After a town sets an outpost spawn | No |
+| `town.TownOutlawAddEvent` | After a player is added to the outlaw list | No |
+| `town.TownOutlawRemoveEvent` | After a player is removed from the outlaw list | No |
+| `town.TownTrustAddEvent` | After a resident is trusted in a town | No |
+| `town.TownTrustRemoveEvent` | After trust is removed | No |
+| `town.TownTrustTownAddEvent` | After a whole town is trusted | No |
+| `town.TownTrustTownRemoveEvent` | After a town trust is removed | No |
+| `town.TownAddAlliedTownEvent` | After a town ally is added | No |
+| `town.TownRemoveAlliedTownEvent` | After a town ally is removed | No |
+| `town.TownAddEnemiedTownEvent` | After a town enemy is added | No |
+| `town.TownRemoveEnemiedTownEvent` | After a town enemy is removed | No |
+| `TownAddResidentRankEvent` | After a resident rank is assigned | No |
+| `TownRemoveResidentRankEvent` | After a resident rank is removed | No |
+| `TownInvitePlayerEvent` | After a player is invited to a town | No |
+| `town.TownPreInvitePlayerEvent` | Before a player is invited | Yes |
+| `TownUpkeepCalculationEvent` | When upkeep cost is being calculated | No |
+| `TownBlockClaimCostCalculationEvent` | When claim cost is calculated | No |
+| `BonusBlockPurchaseCostCalculationEvent` | When bonus block purchase cost is calculated | No |
+
+---
+
+## Nation events
+
+| Event class | When it fires | Cancellable? |
+|-------------|---------------|:---:|
+| `NewNationEvent` | After a nation is created | No |
+| `PreDeleteNationEvent` | Before a nation is deleted | No |
+| `DeleteNationEvent` | After a nation is deleted | No |
+| `RenameNationEvent` | After a nation is renamed | No |
+| `NationPreRenameEvent` | Before a nation is renamed | Yes |
+| `NationAddTownEvent` | After a town joins a nation | No |
+| `NationPreAddTownEvent` | Before a town joins a nation | Yes |
+| `NationRemoveTownEvent` | After a town leaves a nation | No |
+| `NationAcceptAllyRequestEvent` | After an ally request is accepted | No |
+| `NationRequestAllyNationEvent` | After an ally request is sent | No |
+| `NationDenyAllyRequestEvent` | After an ally request is denied | No |
+| `NationRemoveAllyEvent` | After an alliance is removed | No |
+| `NationAddEnemyEvent` | After an enemy is declared | No |
+| `NationPreAddEnemyEvent` | Before an enemy is declared | Yes |
+| `NationRemoveEnemyEvent` | After an enemy is cleared | No |
+| `NationPreRemoveEnemyEvent` | Before an enemy is cleared | Yes |
+| `NationSpawnEvent` | When a player spawns to a nation | Yes |
+| `NationInviteTownEvent` | After a town receives a nation invite | No |
+| `NationRangeAllowTownEvent` | When range-based nation acceptance is evaluated | No |
+| `NationUpkeepCalculationEvent` | When nation upkeep cost is calculated | No |
+| `NationBonusCalculationEvent` | When nation bonus blocks are calculated | No |
+
+---
+
+## Resident events
+
+| Event class | When it fires | Cancellable? |
+|-------------|---------------|:---:|
+| `resident.NewResidentEvent` | After a new resident record is created | No |
+| `DeletePlayerEvent` | After a resident's data is deleted | No |
+| `RenameResidentEvent` | After a resident is renamed | No |
+| `resident.ResidentJailEvent` | After a resident is jailed | No |
+| `resident.ResidentPreJailEvent` | Before a resident is jailed | Yes |
+| `resident.ResidentUnjailEvent` | After a resident is released from jail | No |
+| `resident.ResidentToggleModeEvent` | After a resident toggles a mode | No |
+
+---
+
+## Plot / TownBlock events
+
+| Event class | When it fires | Cancellable? |
+|-------------|---------------|:---:|
+| `PlotChangeTypeEvent` | After a plot type changes | No |
+| `PlotPreChangeTypeEvent` | Before a plot type changes | Yes |
+| `PlotClearEvent` | After a plot is cleared | No |
+| `PlotPreClearEvent` | Before a plot is cleared | Yes |
+| `TownBlockTypeRegisterEvent` | When custom plot types can be registered | No |
+| `plot.changeowner.PlotClaimEvent` | After a player claims a plot | No |
+| `plot.changeowner.PlotPreClaimEvent` | Before a player claims a plot | Yes |
+| `plot.changeowner.PlotUnclaimEvent` | After a player unclaims a plot | No |
+| `plot.changeowner.PlotPreUnclaimEvent` | Before a player unclaims a plot | Yes |
+| `plot.changeowner.PlotChangeOwnerEvent` | After plot ownership changes | No |
+| `plot.PlotSetForSaleEvent` | After a plot is listed for sale | No |
+| `plot.PlotNotForSaleEvent` | After a plot is taken off sale | No |
+| `plot.PlotTrustAddEvent` | After a resident is trusted on a plot | No |
+| `plot.PlotTrustRemoveEvent` | After a resident trust is removed from a plot | No |
+| `plot.group.PlotGroupCreatedEvent` | After a plot group is created | No |
+| `plot.group.PlotGroupDeletedEvent` | After a plot group is deleted | No |
+| `PlayerChangePlotEvent` | After a player moves between plot/wilderness areas | No |
+| `plot.district.DistrictCreatedEvent` | After a district is created | No |
+| `plot.district.DistrictDeletedEvent` | After a district is deleted | No |
+
+---
+
+## Economy events
+
+All classes are in `com.palmergames.bukkit.towny.event.economy`.
+
+| Event class | When it fires | Cancellable? |
+|-------------|---------------|:---:|
+| `TownPreTransactionEvent` | Before any town bank transaction | Yes |
+| `TownTransactionEvent` | After a town bank transaction | No |
+| `NationPreTransactionEvent` | Before any nation bank transaction | Yes |
+| `NationTransactionEvent` | After a nation bank transaction | No |
+| `TownyPreTransactionEvent` | Before any Towny object transaction | Yes |
+| `TownyTransactionEvent` | After any Towny object transaction | No |
+| `BankTransactionEvent` | After any bank transaction | No |
+| `TownEntersBankruptcyEvent` | When a town enters bankruptcy | No |
+
+---
+
+## System events
+
+| Event class | When it fires | Cancellable? |
+|-------------|---------------|:---:|
+| `TownyLoadedDatabaseEvent` | After Towny's database has fully loaded | No |
+| `TranslationLoadEvent` | When Towny loads (or reloads) translation files | No |
+| `NewDayEvent` | At the start of a Towny new-day cycle (tax/upkeep) | No |
+| `PreNewDayEvent` | Before the new-day cycle begins | Yes |
+| `GovernmentTagChangeEvent` | After a town or nation tag changes | No |
+| `TagChangeEvent` | After any Towny object tag changes | No |
+| `time.NewHourEvent` | Every in-game Towny hour | No |
+| `time.NewShortTimeEvent` | Every short timer tick | No |
+
+---
+
+## Listening to `NewTownEvent` — full example
+
+```java
+import com.palmergames.bukkit.towny.event.NewTownEvent;
+import com.palmergames.bukkit.towny.object.Town;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class TownFoundListener implements Listener {
+
+    private final JavaPlugin plugin;
+
+    public TownFoundListener(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    // EventPriority.MONITOR means we are only observing, not modifying.
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onNewTown(NewTownEvent event) {
+        Town town = event.getTown();
+
+        // NewTownEvent is async — schedule any synchronous work on the main thread.
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            plugin.getLogger().info("New town created: " + town.getName()
+                + " (mayor: " + town.getMayor().getName() + ")");
+        });
+    }
+}
+```

@@ -1,0 +1,185 @@
+---
+title: "Towny permission nodes reference"
+description: "A complete reference of Towny's permission nodes — how they work with LuckPerms or Vault, the top-level nodes, and per-command nodes grouped by command."
+---
+
+Towny integrates with any permission plugin that supports the Bukkit permissions API. The most common choices are **LuckPerms**, **Vault** (bridging to other plugins), and **GroupManager**. Towny checks the standard Bukkit permission system, so any compatible plugin will work.
+
+Towny ships with two separate permission layers:
+
+1. **plugin.yml nodes** — standard Bukkit permission nodes that your permission plugin manages. These control command access and override abilities.
+2. **townyperms.yml nodes** — granted to players based on their Towny rank (nomad, resident, mayor, king, and custom ranks). These are applied by Towny itself, not by your permission plugin.
+
+This page covers the plugin.yml nodes. For `townyperms.yml`, see [townyperms.yml: configuring rank permissions](/config/townyperms).
+
+---
+
+## Top-level nodes
+
+| Node | Default | Description |
+|---|---|---|
+| `towny.admin` | op | Full admin access. Grants all command nodes, build anywhere, and all spawn nodes. |
+| `towny.town.resident` | false | Required to join a town. Included in `nomad` section of `townyperms.yml` by default. |
+| `towny.townless` | false | Assigned to players who do not belong to a town. Use this to grant or restrict townless players. |
+| `towny.wild.*` | false | Build, destroy, switch, and use items in the wilderness. |
+| `towny.claimed.*` | false | Build, destroy, switch, and use items in all claimed town land. |
+| `towny.bypass_death_costs` | false | The player is not charged Towny death costs. |
+| `towny.bypass_bed_restriction` | false | The player is not subject to bed-use restrictions. |
+| `towny.receives-plot-notifications` | true | Show border-crossing notifications when entering or leaving towns and plots. |
+
+### Wilderness override nodes
+
+`towny.wild.*` grants all four action types in the wilderness. You can grant or deny individual sub-nodes for finer control:
+
+| Node | Description |
+|---|---|
+| `towny.wild.build.*` | Build in the wilderness |
+| `towny.wild.destroy.*` | Break blocks in the wilderness |
+| `towny.wild.switch.*` | Use switches (levers, buttons, doors) in the wilderness |
+| `towny.wild.item_use.*` | Use items in the wilderness |
+
+Replace `*` with a block ID (e.g. `towny.wild.build.stone`) to target specific materials.
+
+### Claimed land override nodes
+
+`towny.claimed.*` grants access across **all** claimed town land. Sub-nodes let you target specific zones:
+
+| Node | Zone |
+|---|---|
+| `towny.claimed.townowned.*` | Town-owned (unassigned) plots |
+| `towny.claimed.owntown.*` | Plots inside the player's own town |
+| `towny.claimed.alltown.*` | Any claimed plot in any town |
+
+Each zone supports `.build.*`, `.destroy.*`, `.switch.*`, and `.item_use.*` suffixes.
+
+---
+
+## Spawn nodes
+
+| Node | Description |
+|---|---|
+| `towny.town.spawn.*` | All spawn travel nodes |
+| `towny.town.spawn.town` | Use `/town spawn` to your own town |
+| `towny.town.spawn.nation` | Use `/town spawn [town]` to another town in your nation |
+| `towny.town.spawn.ally` | Use `/town spawn [town]` to an allied nation's town |
+| `towny.town.spawn.public` | Use `/town spawn [town]` to any public town |
+| `towny.town.spawn.outpost` | Use `/town outpost` |
+| `towny.admin.spawn` | Admin spawn without warmup, cooldown, or charge |
+
+---
+
+## Command permission nodes
+
+### /resident commands
+
+| Node | Description |
+|---|---|
+| `towny.command.resident.*` | All resident commands |
+| `towny.command.resident.otherresident` | Look up other residents (`/res <name>`) |
+| `towny.command.resident.set.*` | All `/res set` subcommands |
+| `towny.command.resident.toggle.*` | All `/res toggle` subcommands |
+| `towny.command.resident.friend` | Manage friend list |
+| `towny.command.resident.list` | View resident list |
+
+### /town commands
+
+| Node | Description |
+|---|---|
+| `towny.command.town.*` | All town commands |
+| `towny.command.town.othertown` | Look up other towns |
+| `towny.command.town.new` | Found a new town |
+| `towny.command.town.claim.*` | All claim subcommands |
+| `towny.command.town.invite.*` | All invite subcommands |
+| `towny.command.town.set.*` | All `/town set` subcommands |
+| `towny.command.town.toggle.*` | All `/town toggle` subcommands |
+| `towny.command.town.deposit` | Deposit to the town bank |
+| `towny.command.town.withdraw` | Withdraw from the town bank |
+| `towny.command.town.buy.*` | Buy bonus townblocks |
+| `towny.command.town.unclaim.*` | Unclaim townblocks |
+| `towny.command.town.kick` | Kick a resident |
+| `towny.command.town.rank.*` | Assign town ranks |
+| `towny.command.town.list.*` | View and sort the town list |
+| `towny.command.town.jail` | Jail a player |
+| `towny.command.town.unjail` | Unjail a player |
+| `towny.command.town.outlaw` | Manage the outlaw list |
+| `towny.command.town.merge` | Merge two towns |
+| `towny.command.town.delete` | Delete the town |
+| `towny.command.town.deposit.othertown` | Deposit into another town's bank |
+
+### /nation commands
+
+| Node | Description |
+|---|---|
+| `towny.command.nation.*` | All nation commands |
+| `towny.command.nation.othernation` | Look up other nations |
+| `towny.command.nation.new` | Found a new nation |
+| `towny.command.nation.invite.*` | All nation invite subcommands |
+| `towny.command.nation.ally.*` | All ally subcommands |
+| `towny.command.nation.set.*` | All `/nation set` subcommands |
+| `towny.command.nation.toggle.*` | All `/nation toggle` subcommands |
+| `towny.command.nation.deposit` | Deposit to the nation bank |
+| `towny.command.nation.withdraw` | Withdraw from the nation bank |
+| `towny.command.nation.rank.*` | Assign nation ranks |
+| `towny.command.nation.kick` | Kick a town from the nation |
+| `towny.command.nation.enemy` | Manage the enemy list |
+| `towny.command.nation.delete` | Delete the nation |
+| `towny.command.nation.list.*` | View and sort the nation list |
+
+### /plot commands
+
+| Node | Description |
+|---|---|
+| `towny.command.plot.*` | All plot commands |
+| `towny.command.plot.claim` | Claim a plot |
+| `towny.command.plot.unclaim` | Unclaim a plot |
+| `towny.command.plot.set.*` | All `/plot set` subcommands |
+| `towny.command.plot.toggle.*` | All `/plot toggle` subcommands |
+| `towny.command.plot.perm.*` | All `/plot perm` subcommands |
+| `towny.command.plot.group.*` | All plot group subcommands |
+| `towny.command.plot.forsale` | Mark a plot for sale |
+| `towny.command.plot.evict` | Evict a plot owner |
+| `towny.command.plot.trust` | Trust a player on a plot |
+
+### /townyadmin commands
+
+| Node | Description |
+|---|---|
+| `towny.command.townyadmin.*` | All admin commands |
+| `towny.command.townyadmin.reload` | Reload the plugin config |
+| `towny.command.townyadmin.town.*` | Admin town management commands |
+| `towny.command.townyadmin.nation.*` | Admin nation management commands |
+| `towny.command.townyadmin.resident.*` | Admin resident management commands |
+| `towny.command.townyadmin.eco.*` | Admin economy commands |
+| `towny.command.townyadmin.toggle.*` | Admin toggle commands |
+| `towny.command.townyadmin.set.*` | Admin set commands |
+| `towny.command.townyadmin.newday` | Manually trigger a new day event |
+| `towny.command.townyadmin.purge` | Purge inactive residents |
+| `towny.command.townyadmin.backup` | Run a database backup |
+
+### /townyworld commands
+
+| Node | Description |
+|---|---|
+| `towny.command.townyworld.*` | All TownyWorld commands |
+| `towny.command.townyworld.toggle.*` | Toggle all world settings |
+| `towny.command.townyworld.list` | List configured worlds |
+| `towny.command.townyworld.set` | Set world options |
+| `towny.command.townyworld.regen` | Regenerate world data |
+
+---
+
+## Admin-only nodes
+
+| Node | Description |
+|---|---|
+| `towny.admin.nation_zone` | Build inside nation zones without restrictions |
+| `towny.admin.outlaw.teleport_bypass` | Not teleported out of towns where the player is an outlaw |
+| `towny.admin.town_commands.blacklist_bypass` | Bypass the town command blacklist |
+| `towny.admin.updatealerts` | Receive update notifications on login |
+| `towny.outlaw.jailer` | Required to jail outlaws killed inside a town |
+
+---
+
+<Tip>
+In LuckPerms you can use **contexts** to apply Towny permissions only in certain worlds. For example, grant `towny.wild.*` only in a specific creative or freebuild world by creating a context-restricted permission entry.
+</Tip>

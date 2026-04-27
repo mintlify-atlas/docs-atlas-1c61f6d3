@@ -1,0 +1,279 @@
+---
+title: "TownyAdmin commands (/townyadmin)"
+description: "Complete reference for /townyadmin and its alias /ta — admin tools for managing towns, nations, residents, economy, toggles, backups, and server maintenance."
+---
+
+The `/townyadmin` command (alias `/ta`) gives server operators full administrative control over Towny. With it you can create, delete, and modify towns and nations without being a member, force economy operations, toggle server-wide settings, purge stale data, and trigger backups or database reloads.
+
+<Warning>
+Most `/townyadmin` commands are irreversible. Actions such as deleting a town, purging residents, or resetting banks permanently alter data. Always back up before running destructive commands in production.
+</Warning>
+
+<Note>
+The root permission node is `towny.admin`, which grants all admin capabilities. Individual subcommand nodes follow the pattern `towny.command.townyadmin.<subcommand>`.
+</Note>
+
+## Subcommand overview
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta backup` | Create an immediate data backup. | `towny.command.townyadmin.backup` |
+| `/ta checkperm <player> <node>` | Check whether a player has a permission node. | `towny.command.townyadmin.checkperm` |
+| `/ta checkoutposts` | Verify and repair outpost claim data. | `towny.command.townyadmin.checkoutposts` |
+| `/ta givebonus <town> <amount>` | Give a town bonus town blocks. | `towny.command.townyadmin.givebonus` |
+| `/ta newday` | Manually trigger the new-day event. | `towny.command.townyadmin.newday` |
+| `/ta newhour` | Manually trigger the new-hour event. | `towny.command.townyadmin.newhour` |
+| `/ta purge <days>` | Delete residents inactive for more than N days. | `towny.command.townyadmin.purge` |
+| `/ta reload` | Reload all Towny configuration files. | `towny.command.townyadmin.reload` |
+| `/ta reset` | Reset Towny data (dangerous). | `towny.command.townyadmin.reset` |
+| `/ta tpplot` | Teleport to the plot at given coordinates. | `towny.command.townyadmin.tpplot` |
+| `/ta unclaim` | Forcibly unclaim the chunk you are standing in. | `towny.command.townyadmin.unclaim` |
+| `/ta mysqldump` | Dump the database to a SQL file. | `towny.command.townyadmin.mysqldump` |
+| `/ta database save\|load\|remove` | Save, load, or remove database entries. | `towny.command.townyadmin.database` |
+| `/ta townyperms` | Reload the townyperms.yml file. | `towny.command.townyadmin.townyperms` |
+| `/ta install` | Run the initial Towny setup wizard. | `towny.command.townyadmin.install` |
+
+---
+
+## Toggle (`/ta toggle`)
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta toggle debug` | Toggle debug logging. | `towny.command.townyadmin.toggle.debug` |
+| `/ta toggle devmode` | Toggle developer mode output. | `towny.command.townyadmin.toggle.devmode` |
+| `/ta toggle npc` | Toggle NPC resident creation. | `towny.command.townyadmin.toggle.npc` |
+| `/ta toggle wildernessuse` | Toggle wilderness item-use protection. | `towny.command.townyadmin.toggle.wildernessuse` |
+| `/ta toggle regenerations` | Toggle plot regeneration tasks. | `towny.command.townyadmin.toggle.regenerations` |
+| `/ta toggle townwithdraw` | Toggle whether mayors can withdraw from the bank. | `towny.command.townyadmin.toggle.townwithdraw` |
+| `/ta toggle nationwithdraw` | Toggle whether kings can withdraw from the bank. | `towny.command.townyadmin.toggle.nationwithdraw` |
+
+```bash
+# Enable debug logging
+/ta toggle debug
+
+# Disable town bank withdrawals server-wide
+/ta toggle townwithdraw
+```
+
+---
+
+## Set (`/ta set`)
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta set mayor <town> <player>` | Change the mayor of a town. | `towny.command.townyadmin.set.mayor` |
+| `/ta set capital <nation> <town>` | Change a nation's capital town. | `towny.command.townyadmin.set.capital` |
+| `/ta set title <player> <title>` | Set a player's custom title. | `towny.command.townyadmin.set.title` |
+| `/ta set surname <player> <name>` | Set a player's custom surname. | `towny.command.townyadmin.set.surname` |
+| `/ta set about <player> <text>` | Set a player's about/biography text. | `towny.command.townyadmin.set.about` |
+| `/ta set founder <nation> <player>` | Override the recorded nation founder. | `towny.command.townyadmin.set.founder` |
+| `/ta set nationzoneoverride <town> <r>` | Override the nation zone radius for a town. | `towny.command.townyadmin.set.nationzoneoverride` |
+| `/ta set plot <type>` | Change the type of the plot you are standing on. | `towny.command.townyadmin.set.plot` |
+
+```bash
+# Transfer mayorship of Riverdale to Steve
+/ta set mayor Riverdale Steve
+
+# Give a player a custom title
+/ta set title Steve Lord
+
+# Move the nation capital
+/ta set capital Arcadia Riverdale
+```
+
+---
+
+## Town administration (`/ta town`)
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta town new <name> <player>` | Create a new town for a player. | `towny.command.townyadmin.town.new` |
+| `/ta town add <town> <player>` | Add a player to a town without an invite. | `towny.command.townyadmin.town.add` |
+| `/ta town kick <town> <player>` | Remove a player from a town. | `towny.command.townyadmin.town.kick` |
+| `/ta town delete <town>` | Permanently delete a town. | `towny.command.townyadmin.town.delete` |
+| `/ta town rename <town> <name>` | Rename a town. | `towny.command.townyadmin.town.rename` |
+| `/ta town merge <town> <into>` | Merge one town into another. | `towny.command.townyadmin.town.merge` |
+| `/ta town forcemerge <town> <into>` | Force-merge, skipping confirmations. | `towny.command.townyadmin.town.forcemerge` |
+| `/ta town spawn <town>` | Teleport to a town's spawn. | `towny.command.townyadmin.town.spawn` |
+| `/ta town outpost <town> <n>` | Teleport to a town's outpost. | `towny.command.townyadmin.town.outpost` |
+| `/ta town invite <town> <nation>` | Add a town to a nation (invite bypass). | `towny.command.townyadmin.town.invite` |
+| `/ta town leavenation <town>` | Force a town to leave its nation. | `towny.command.townyadmin.town.leavenation` |
+| `/ta town rank <town> <add\|remove> <player> <rank>` | Modify town ranks. | `towny.command.townyadmin.town.rank` |
+| `/ta town set <town> <key> <value>` | Set a property on a town. | `towny.command.townyadmin.town.set` |
+| `/ta town toggle <town> <flag>` | Toggle a flag on a town. | `towny.command.townyadmin.town.toggle` |
+| `/ta town outlaw <town> <add\|remove> <player>` | Manage a town's outlaw list. | `towny.command.townyadmin.town.outlaw` |
+| `/ta town deposit <town> <amount>` | Deposit money into a town bank. | `towny.command.townyadmin.town.deposit` |
+| `/ta town withdraw <town> <amount>` | Withdraw money from a town bank. | `towny.command.townyadmin.town.withdraw` |
+| `/ta town bankhistory <town>` | View a town's bank history. | `towny.command.townyadmin.town.bankhistory` |
+| `/ta town trust <town> <add\|remove> <player>` | Manage trusted players in a town. | `towny.command.townyadmin.town.trust` |
+| `/ta town trusttown <town> <add\|remove> <other>` | Manage trusted towns. | `towny.command.townyadmin.town.trusttown` |
+| `/ta town unruin <town>` | Restore a ruined town to active status. | `towny.command.townyadmin.town.unruin` |
+| `/ta town forsale <town> <price>` | Put a town up for sale. | `towny.command.townyadmin.town.forsale` |
+| `/ta town notforsale <town>` | Remove a town from sale. | `towny.command.townyadmin.town.notforsale` |
+| `/ta town meta <town> <set\|add\|remove> <key> [value]` | Manage town metadata. | `towny.command.townyadmin.town.meta` |
+| `/ta town settownlevel <town> <level>` | Override the town level. | `towny.command.townyadmin.town.settownlevel` |
+| `/ta town giveboughtblocks <town> <n>` | Give a town bought town blocks. | `towny.command.townyadmin.town.giveboughtblocks` |
+| `/ta town checkoutposts <town>` | Validate a specific town's outpost data. | `towny.command.townyadmin.town.checkoutposts` |
+
+```bash
+# Create a new town for Steve at his location
+/ta town new Riverside Steve
+
+# Force-delete a town
+/ta town delete Riverside
+
+# Merge Riverside into Oaktown
+/ta town merge Riverside Oaktown
+
+# Move a town's mayor
+/ta town set Riverside mayor Steve
+
+# Toggle mobs in a town from the console
+/ta town toggle Riverside mobs
+
+# Grant Steve the Assistant rank in Riverside
+/ta town rank Riverside add Steve Assistant
+```
+
+---
+
+## Nation administration (`/ta nation`)
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta nation new <name> <mayor>` | Create a new nation. | `towny.command.townyadmin.nation.new` |
+| `/ta nation add <nation> <town>` | Add a town to a nation without an invite. | `towny.command.townyadmin.nation.add` |
+| `/ta nation kick <nation> <town>` | Remove a town from a nation. | `towny.command.townyadmin.nation.kick` |
+| `/ta nation delete <nation>` | Permanently delete a nation. | `towny.command.townyadmin.nation.delete` |
+| `/ta nation rename <nation> <name>` | Rename a nation. | `towny.command.townyadmin.nation.rename` |
+| `/ta nation merge <nation> <into>` | Merge one nation into another. | `towny.command.townyadmin.nation.merge` |
+| `/ta nation forcemerge <nation> <into>` | Force-merge nations. | `towny.command.townyadmin.nation.forcemerge` |
+| `/ta nation rank <nation> <add\|remove> <player> <rank>` | Manage nation ranks. | `towny.command.townyadmin.nation.rank` |
+| `/ta nation set <nation> <key> <value>` | Set a property on a nation. | `towny.command.townyadmin.nation.set` |
+| `/ta nation toggle <nation> <flag>` | Toggle a flag on a nation. | `towny.command.townyadmin.nation.toggle` |
+| `/ta nation ally <nation> <add\|remove> <other>` | Manage a nation's ally list. | `towny.command.townyadmin.nation.ally` |
+| `/ta nation enemy <nation> <add\|remove> <other>` | Manage a nation's enemy list. | `towny.command.townyadmin.nation.enemy` |
+| `/ta nation sanctiontown <nation> <add\|remove> <town>` | Manage sanctioned towns. | `towny.command.townyadmin.nation.sanctiontown` |
+| `/ta nation deposit <nation> <amount>` | Deposit into a nation bank. | `towny.command.townyadmin.nation.deposit` |
+| `/ta nation withdraw <nation> <amount>` | Withdraw from a nation bank. | `towny.command.townyadmin.nation.withdraw` |
+| `/ta nation bankhistory <nation>` | View a nation's bank history. | `towny.command.townyadmin.nation.bankhistory` |
+| `/ta nation transfer <nation> <town>` | Transfer a nation to a new capital. | `towny.command.townyadmin.nation.transfer` |
+| `/ta nation recheck <nation>` | Recheck nation validity. | `towny.command.townyadmin.nation.recheck` |
+| `/ta nation meta <nation> <set\|add\|remove> <key> [value]` | Manage nation metadata. | `towny.command.townyadmin.nation.meta` |
+| `/ta nation setnationlevel <nation> <level>` | Override the nation level. | `towny.command.townyadmin.nation.setnationlevel` |
+
+```bash
+# Create a nation for the mayor of Riverside
+/ta nation new Arcadia Steve
+
+# Force add a town to a nation
+/ta nation add Arcadia Riverside
+
+# Delete a nation
+/ta nation delete Arcadia
+```
+
+---
+
+## Resident administration (`/ta resident`)
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta resident rename <player> <name>` | Rename a resident's Towny record. | `towny.command.townyadmin.resident.rename` |
+| `/ta resident delete <player>` | Delete a resident's Towny data. | `towny.command.townyadmin.resident.delete` |
+| `/ta resident unjail <player>` | Release a jailed player by admin. | `towny.command.townyadmin.resident.unjail` |
+| `/ta resident about <player> <text>` | Set a player's about text as admin. | `towny.command.townyadmin.resident.about` |
+| `/ta resident friend <player> <add\|remove\|list> [target]` | Manage a resident's friend list. | `towny.command.townyadmin.resident.friend` |
+| `/ta resident set <player> <lastonline\|registered> <value>` | Override resident date fields. | `towny.command.townyadmin.resident.set` |
+| `/ta resident meta <player> <set\|add\|remove> <key> [value]` | Manage resident metadata. | *(admin)* |
+
+```bash
+# Release a jailed player
+/ta resident unjail Steve
+
+# Delete a resident record
+/ta resident delete OldPlayer
+
+# Rename a resident's stored name
+/ta resident rename OldName NewName
+```
+
+---
+
+## Economy administration (`/ta eco`)
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta eco depositall <amount>` | Deposit money into all town and nation banks. | `towny.command.townyadmin.eco.depositall` |
+| `/ta eco depositalltowns <amount>` | Deposit money into all town banks. | `towny.command.townyadmin.eco.depositalltowns` |
+| `/ta eco depositallnations <amount>` | Deposit money into all nation banks. | `towny.command.townyadmin.eco.depositallnations` |
+| `/ta eco resetbanks` | Reset all town and nation bank balances to zero. | `towny.command.townyadmin.eco.resetbanks` |
+| `/ta eco convert` | Convert economy data between providers. | `towny.command.townyadmin.eco.convert` |
+| `/ta eco info` | Show economy provider information. | `towny.command.townyadmin.eco.info` |
+
+<Warning>
+`/ta eco resetbanks` sets every town and nation bank balance to zero. This cannot be undone. Back up your data first.
+</Warning>
+
+```bash
+# Give every town 500 as a stimulus
+/ta eco depositalltowns 500
+
+# Check which economy provider is active
+/ta eco info
+
+# Reset all bank balances
+/ta eco resetbanks
+```
+
+---
+
+## Plot administration (`/ta plot`)
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/ta plot claim <town>` | Force-claim the current chunk for a town. | `towny.command.townyadmin.plot.claim` |
+| `/ta plot claimedat <timestamp>` | Override the "claimed at" timestamp. | `towny.command.townyadmin.plot.claimedat` |
+| `/ta plot trust <add\|remove> <player>` | Manage trusted players on the current plot. | `towny.command.townyadmin.plot.trust` |
+| `/ta plot meta <set\|add\|remove> <key> [value]` | Manage plot metadata. | `towny.command.townyadmin.plot.meta` |
+
+```bash
+# Force-claim the current chunk for Riverside
+/ta plot claim Riverside
+```
+
+---
+
+## Maintenance commands
+
+```bash
+# Trigger a data backup right now
+/ta backup
+
+# Reload all config files without restarting
+/ta reload
+
+# Manually fire the new-day event (taxes, upkeep)
+/ta newday
+
+# Manually fire the new-hour event
+/ta newhour
+
+# Remove residents who have been offline more than 30 days
+/ta purge 30
+
+# Check whether Steve has a permission node
+/ta checkperm Steve towny.command.town.claim.town
+
+# Give Riverside 5 bonus town blocks
+/ta givebonus Riverside 5
+
+# Forcibly unclaim the chunk you are standing on
+/ta unclaim
+
+# Teleport to a specific plot by world coordinates
+/ta tpplot
+
+# Verify all outpost claim data
+/ta checkoutposts
+```

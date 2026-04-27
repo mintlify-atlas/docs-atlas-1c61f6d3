@@ -1,0 +1,260 @@
+---
+title: "Nation command reference (/nation, /n, /nat)"
+description: "Full reference for /nation and its aliases /n and /nat — create nations, manage member towns, handle diplomacy, set taxes, and control nation-wide toggles."
+---
+
+Nations sit at the top of Towny's hierarchy, grouping towns together under a King. The `/nation` command (aliases `/n` and `/nat`) controls everything from founding a nation and inviting towns, to managing allies, enemies, taxes, and bank transactions.
+
+<Note>
+Most subcommands require you to be a member of a nation. Administrative actions (add, kick, set, toggle) typically require the King or a resident holding the appropriate nation rank. Permission nodes follow the pattern `towny.command.nation.<subcommand>`.
+</Note>
+
+## Subcommand overview
+
+| Command | Description | Permission node |
+|---|---|---|
+| `/nation` | View your own nation's status. | *(member)* |
+| `/nation <name>` | View another nation's status. | `towny.command.nation.othernation` |
+| `/nation new <name>` | Found a new nation with your town as the capital. | `towny.command.nation.new` |
+| `/nation add <town>` | Invite a town to join the nation. | `towny.command.nation.add` |
+| `/nation invite <town>` | Send a join invite to a town. | `towny.command.nation.invite.add` |
+| `/nation invite sent` | List outgoing invites from your nation. | `towny.command.nation.invite.sent` |
+| `/nation invite received` | List invites your nation has received. | `towny.command.nation.invite.received` |
+| `/nation invite accept` | Accept a pending ally request. | `towny.command.nation.invite.accept` |
+| `/nation invite deny` | Deny a pending ally request. | `towny.command.nation.invite.deny` |
+| `/nation join <nation>` | Join an open nation with your town. | `towny.command.nation.join` |
+| `/nation kick <town>` | Remove a town from the nation. | `towny.command.nation.kick` |
+| `/nation leave` | Remove your town from the nation. | `towny.command.nation.leave` |
+| `/nation delete` | Permanently delete the nation. | `towny.command.nation.delete` |
+| `/nation ally add <nation>` | Send an ally request to another nation. | `towny.command.nation.ally.add` |
+| `/nation ally remove <nation>` | Remove an existing alliance. | `towny.command.nation.ally.remove` |
+| `/nation ally accept <nation>` | Accept an incoming ally request. | `towny.command.nation.ally.accept` |
+| `/nation ally deny <nation>` | Deny an incoming ally request. | `towny.command.nation.ally.deny` |
+| `/nation ally sent` | List outgoing ally requests. | `towny.command.nation.ally.sent` |
+| `/nation ally received` | List incoming ally requests. | `towny.command.nation.ally.received` |
+| `/nation enemy add <nation>` | Declare another nation an enemy. | `towny.command.nation.enemy` |
+| `/nation enemy remove <nation>` | Remove an enemy declaration. | `towny.command.nation.enemy` |
+| `/nation deposit <amount>` | Deposit money into the nation bank. | `towny.command.nation.deposit` |
+| `/nation withdraw <amount>` | Withdraw money from the nation bank. | `towny.command.nation.withdraw` |
+| `/nation rank add <resident> <rank>` | Grant a resident a nation rank. | `towny.command.nation.rank.*` |
+| `/nation rank remove <resident> <rank>` | Remove a nation rank from a resident. | `towny.command.nation.rank.*` |
+| `/nation ranklist` | List all ranked nation residents. | `towny.command.nation.ranklist` |
+| `/nation set board <msg>` | Set the nation message of the day. | `towny.command.nation.set.board` |
+| `/nation set capital <town>` | Move the nation capital to another town. | `towny.command.nation.set.capital` |
+| `/nation set king <player>` | Transfer leadership to another resident. | `towny.command.nation.set.king` |
+| `/nation set name <name>` | Rename the nation. | `towny.command.nation.set.name` |
+| `/nation set spawn` | Set the nation spawn at your location. | `towny.command.nation.set.spawn` |
+| `/nation set spawncost <amount>` | Set the cost to teleport to nation spawn. | `towny.command.nation.set.spawncost` |
+| `/nation set tag <tag>` | Set a short tag for the nation. | `towny.command.nation.set.tag` |
+| `/nation set taxes <amount>` | Set the daily tax charged to member towns. | `towny.command.nation.set.taxes` |
+| `/nation set title <player> <title>` | Set a custom title for a nation resident. | `towny.command.nation.set.title` |
+| `/nation set surname <player> <name>` | Set a custom surname for a nation resident. | `towny.command.nation.set.surname` |
+| `/nation set mapcolor <color>` | Set the nation's color on Dynmap. | `towny.command.nation.set.mapcolor` |
+| `/nation set taxpercentcap <n>` | Cap the maximum tax-percent amount. | `towny.command.nation.set.taxpercentcap` |
+| `/nation set conqueredtax <amount>` | Set the tax applied to conquered towns. | `towny.command.nation.set.conqueredtax` |
+| `/nation toggle neutral` | Toggle paying upkeep to be neutral. | `towny.command.nation.toggle.neutral` |
+| `/nation toggle public` | Toggle whether the nation spawn is public. | `towny.command.nation.toggle.public` |
+| `/nation toggle open` | Toggle whether towns can join without invite. | `towny.command.nation.toggle.open` |
+| `/nation toggle taxpercent` | Toggle taxes as a percentage of town balance. | `towny.command.nation.toggle.taxpercent` |
+| `/nation spawn` | Teleport to the nation spawn. | `towny.command.nation.spawn` |
+| `/nation spawn <nation>` | Teleport to another nation's spawn (if public). | `towny.nation.spawn.public` |
+| `/nation online` | List online residents across all nation towns. | `towny.command.nation.online` |
+| `/nation townlist` | List all towns in the nation. | `towny.command.nation.townlist` |
+| `/nation allylist` | List all allied nations. | `towny.command.nation.allylist` |
+| `/nation enemylist` | List all enemy nations. | `towny.command.nation.enemylist` |
+| `/nation ranklist` | List residents who hold a nation rank. | `towny.command.nation.ranklist` |
+| `/nation list` | List all nations (sorted by residents). | `towny.command.nation.list` |
+| `/nation list <sort>` | List nations sorted by a specific field. | `towny.command.nation.list.*` |
+| `/nation sanctiontown add <town>` | Sanction a town (restricts trade/diplomacy). | `towny.command.nation.sanctiontown` |
+| `/nation sanctiontown remove <town>` | Remove a sanction from a town. | `towny.command.nation.sanctiontown` |
+| `/nation say <message>` | Send a message to all online nation members. | `towny.command.nation.say` |
+| `/nation bankhistory [pages]` | View the nation bank transaction history. | `towny.command.nation.bankhistory` |
+| `/nation baltop` | Show the top nations by bank balance. | `towny.command.nation.baltop` |
+| `/nation king` | Show help for king-specific commands. | `towny.command.nation.king` |
+| `/nation merge <nation>` | Merge another nation into yours. | *(admin perm)* |
+
+---
+
+## Creating and joining nations
+
+<Warning>
+Creating a nation costs money (configured by the admin). Deleting a nation is permanent — all member towns lose their nation membership immediately.
+</Warning>
+
+```bash
+# Found a new nation named Arcadia
+/nation new Arcadia
+
+# Invite a town to join
+/nation invite Riverdale
+
+# Accept an incoming ally request (from the ally command)
+/nation ally accept OtherNation
+
+# Join an open nation with your town
+/nation join Arcadia
+
+# Leave the current nation (as a mayor)
+/nation leave
+```
+
+---
+
+## Managing member towns
+
+```bash
+# Add a town directly (bypasses invite)
+/nation add Riverdale
+
+# Remove a town from the nation
+/nation kick Riverdale
+
+# Move the capital to a different town
+/nation set capital Riverdale
+
+# Transfer kingship to another resident
+/nation set king Steve
+```
+
+---
+
+## Diplomacy
+
+<Tip>
+Alliance requests must be accepted by both nations before an alliance is active. Enemy declarations are one-sided.
+</Tip>
+
+```bash
+# Send an ally request
+/nation ally add Britannia
+
+# Accept an ally request from Britannia
+/nation ally accept Britannia
+
+# Deny an ally request
+/nation ally deny Britannia
+
+# Remove an existing alliance
+/nation ally remove Britannia
+
+# Declare a nation as an enemy
+/nation enemy add Mordor
+
+# Remove the enemy declaration
+/nation enemy remove Mordor
+
+# See all current allies
+/nation allylist
+
+# See all current enemies
+/nation enemylist
+```
+
+---
+
+## Nation bank
+
+```bash
+# Deposit 1000 into the nation bank
+/nation deposit 1000
+
+# Withdraw 500 from the nation bank (king only)
+/nation withdraw 500
+
+# View the last page of transactions
+/nation bankhistory
+
+# Show top nations by balance
+/nation baltop
+```
+
+---
+
+## Ranks
+
+```bash
+# Grant a resident the Chancellor rank
+/nation rank add Steve Chancellor
+
+# Remove the rank
+/nation rank remove Steve Chancellor
+
+# List all ranked residents
+/nation ranklist
+```
+
+---
+
+## Nation settings (`/nation set`)
+
+```bash
+# Set the message-of-the-day
+/nation set board Join our Discord: discord.gg/example
+
+# Rename the nation
+/nation set name NewArcadia
+
+# Set a short tag
+/nation set tag ARC
+
+# Set flat daily town tax
+/nation set taxes 50
+
+# Set spawn cost
+/nation set spawncost 25
+```
+
+---
+
+## Nation toggles
+
+```bash
+# Toggle neutrality (costs upkeep if enabled)
+/nation toggle neutral
+
+# Make the nation spawn publicly accessible
+/nation toggle public
+
+# Allow towns to join without an invite
+/nation toggle open
+
+# Use percentage-based taxes
+/nation toggle taxpercent
+```
+
+---
+
+## Listing and information
+
+```bash
+# List all nations by residents (default)
+/nation list
+
+# Sort by balance
+/nation list balance
+
+# Sort by number of towns
+/nation list towns
+
+# Other sort options: name, residents, open, public, townblocks, founded, online, upkeep
+
+# View all towns in your nation
+/nation townlist
+
+# List all online nation members
+/nation online
+```
+
+---
+
+## Sanctions
+
+Sanctioning a town restricts certain interactions between the nation and that town.
+
+```bash
+# Sanction a town
+/nation sanctiontown add RivalTown
+
+# Remove the sanction
+/nation sanctiontown remove RivalTown
+```

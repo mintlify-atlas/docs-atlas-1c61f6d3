@@ -1,0 +1,209 @@
+---
+title: "Adding subcommands to Towny with TownyCommandAddonAPI"
+description: "Use TownyCommandAddonAPI to inject your own subcommands into /town, /nation, /resident, /plot, /towny, and /townyadmin without modifying Towny's source code."
+---
+
+`TownyCommandAddonAPI` lets you register new subcommands directly inside Towny's existing command tree. When a player types `/town mycommand`, Towny automatically delegates to your `CommandExecutor` — you do not need to register a separate top-level command or hook into Towny's internals.
+
+**Class:** `com.palmergames.bukkit.towny.TownyCommandAddonAPI`
+
+---
+
+## CommandType enum
+
+`CommandType` determines which Towny command branch your subcommand is injected into.
+
+| Constant | Injected into |
+|----------|--------------|
+| `RESIDENT` | `/resident <sub>` |
+| `RESIDENT_SET` | `/resident set <sub>` |
+| `RESIDENT_TOGGLE` | `/resident toggle <sub>` |
+| `TOWN` | `/town <sub>` |
+| `TOWN_BUY` | `/town buy <sub>` |
+| `TOWN_LIST_BY` | `/town list by <sub>` |
+| `TOWN_SET` | `/town set <sub>` |
+| `TOWN_TOGGLE` | `/town toggle <sub>` |
+| `NATION` | `/nation <sub>` |
+| `NATION_LIST_BY` | `/nation list by <sub>` |
+| `NATION_SET` | `/nation set <sub>` |
+| `NATION_TOGGLE` | `/nation toggle <sub>` |
+| `PLOT` | `/plot <sub>` |
+| `PLOT_SET` | `/plot set <sub>` |
+| `PLOT_TOGGLE` | `/plot toggle <sub>` |
+| `PLOT_GROUP_TOGGLE` | `/plot group toggle <sub>` |
+| `TOWNY` | `/towny <sub>` |
+| `TOWNYADMIN` | `/townyadmin <sub>` |
+| `TOWNYADMIN_TOWN` | `/townyadmin town <townname> <sub>` — town name is prepended to `args` |
+| `TOWNYADMIN_NATION` | `/townyadmin nation <nationname> <sub>` — nation name is prepended to `args` |
+| `TOWNYADMIN_SET` | `/townyadmin set <sub>` |
+| `TOWNYADMIN_TOGGLE` | `/townyadmin toggle <sub>` |
+| `TOWNYADMIN_RELOAD` | `/townyadmin reload <sub>` |
+| `TOWNYWORLD` | `/townyworld <sub>` |
+| `TOWNYWORLD_SET` | `/townyworld set <sub>` |
+| `TOWNYWORLD_TOGGLE` | `/townyworld toggle <sub>` |
+
+<Note>
+`TOWNYADMIN_TOWN` and `TOWNYADMIN_NATION` are special: Towny always prepends the town or nation name as the first element of the `String[] args` array passed to your executor. Account for this when parsing arguments.
+</Note>
+
+---
+
+## Adding a subcommand
+
+### Simple form
+
+```java
+boolean success = TownyCommandAddonAPI.addSubCommand(
+    CommandType,      // which command branch
+    String,           // subcommand name (case-insensitive)
+    CommandExecutor   // your executor
+);
+```
+
+Returns `true` if the command was registered, `false` if the name was already taken for that `CommandType`.
+
+### AddonCommand form
+
+For more control — custom tab completions, overriding the executor later — construct an `AddonCommand` directly:
+
+```java
+boolean success = TownyCommandAddonAPI.addSubCommand(AddonCommand command);
+```
+
+---
+
+## AddonCommand
+
+**Class:** `com.palmergames.bukkit.towny.object.AddonCommand`
+
+`AddonCommand` extends Bukkit's `Command` and wraps your executor with optional tab completion.
+
+### Constructors
+
+```java
+// Basic constructor
+new AddonCommand(CommandType commandType, String name, CommandExecutor commandExecutor)
+```
+
+If your `CommandExecutor` also implements `TabCompleter`, the tab completer is automatically wired up.
+
+### Key methods
+
+| Method | Description |
+|--------|-------------|
+| `getCommandType()` | Returns the `CommandType` this command belongs to. |
+| `getName()` | Returns the subcommand name. |
+| `getCommandExecutor()` | Returns the registered executor. |
+| `setTabCompleter(TabCompleter tabCompleter)` | Sets a separate tab completer (not needed if executor implements `TabCompleter`). |
+| `setTabCompletion(int index, List<String> completions)` | Registers static tab completions for a specific argument index. |
+| `getTabCompletions()` | Returns the map of static tab completions. |
+
+---
+
+## Removing a subcommand
+
+```java
+// By CommandType and name
+TownyCommandAddonAPI.removeSubCommand(CommandType commandType, String name);
+
+// By AddonCommand reference
+TownyCommandAddonAPI.removeSubCommand(AddonCommand command);
+```
+
+---
+
+## Checking for an existing subcommand
+
+```java
+boolean exists = TownyCommandAddonAPI.hasCommand(CommandType commandType, String name);
+
+// Retrieve the AddonCommand itself (returns null if not present)
+AddonCommand cmd = TownyCommandAddonAPI.getAddonCommand(CommandType commandType, String name);
+```
+
+---
+
+## Full example: adding `/town points`
+
+```java
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.TownyCommandAddonAPI;
+import com.palmergames.bukkit.towny.TownyCommandAddonAPI.CommandType;
+import com.palmergames.bukkit.towny.object.AddonCommand;
+import com.palmergames.bukkit.towny.object.Town;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class MyPlugin extends JavaPlugin {
+
+    @Override
+    public void onEnable() {
+        TownyCommandAddonAPI.addSubCommand(
+            CommandType.TOWN,
+            "points",
+            new PointsCommand()
+        );
+    }
+
+    @Override
+    public void onDisable() {
+        // Clean up on disable so the slot is freed if the plugin is reloaded.
+        TownyCommandAddonAPI.removeSubCommand(CommandType.TOWN, "points");
+    }
+
+    private static class PointsCommand implements CommandExecutor {
+
+        @Override
+        public boolean onCommand(CommandSender sender, Command command,
+                                 String label, String[] args) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Only players can use this command.");
+                return true;
+            }
+
+            Town town = TownyAPI.getInstance().getTown(player);
+            if (town == null) {
+                player.sendMessage("You do not belong to a town.");
+                return true;
+            }
+
+            // Your custom logic here
+            player.sendMessage(town.getName() + " has 42 points.");
+            return true;
+        }
+    }
+}
+```
+
+Players can now run `/town points` and your executor handles it.
+
+---
+
+## Adding static tab completions
+
+If your subcommand accepts fixed options, register them per argument index on the `AddonCommand` object:
+
+```java
+import java.util.Arrays;
+
+AddonCommand cmd = new AddonCommand(CommandType.TOWN, "mode", new ModeCommand());
+
+// Index 0 is the first argument after the subcommand name
+cmd.setTabCompletion(0, Arrays.asList("enable", "disable", "status"));
+
+TownyCommandAddonAPI.addSubCommand(cmd);
+```
+
+For dynamic tab completions, implement `TabCompleter` on your executor class and Towny will call it automatically.
+
+---
+
+## Best practices
+
+- **Register during `onEnable`** — Towny must be loaded before you register subcommands. Use `depend: [Towny]` in `plugin.yml` to guarantee load order.
+- **Deregister during `onDisable`** — Call `removeSubCommand` in `onDisable` so the name slot is released when your plugin unloads or reloads.
+- **Handle permissions inside your executor** — `TownyCommandAddonAPI` does not enforce permissions on your behalf. Check `sender.hasPermission(...)` at the top of `onCommand`.
+- **`TOWNYADMIN_TOWN` / `TOWNYADMIN_NATION` args** — Remember that the town or nation name is always `args[0]` for these two types; your actual arguments start at `args[1]`.

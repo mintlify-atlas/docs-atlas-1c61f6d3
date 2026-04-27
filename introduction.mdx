@@ -1,0 +1,79 @@
+---
+title: "Towny Advanced: Minecraft Land Protection & Town Management"
+description: "Towny Advanced is a Bukkit/Paper plugin for Minecraft. Protect land with towns and nations, run economies, and extend gameplay with a powerful Java API."
+---
+
+Towny Advanced is one of the oldest and most feature-rich Minecraft server plugins still in active development. It gives players and server administrators a complete society simulation — players form **Towns**, towns join **Nations**, and a grid-based claim system keeps everyone's land protected. With deep economy integration, granular permissions, and an extensive Java API, Towny powers thousands of multiplayer servers worldwide.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install Towny on your Paper or Folia server and get up and running in minutes.
+  </Card>
+  <Card title="Getting Started" icon="rocket" href="/getting-started">
+    Create your first town, claim land, and invite residents.
+  </Card>
+  <Card title="Command Reference" icon="terminal" href="/commands/town">
+    Browse all player and admin commands with descriptions and permission nodes.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/config/configuration">
+    Tune taxes, upkeep, claim costs, plot types, and hundreds of other settings.
+  </Card>
+  <Card title="Permissions" icon="shield" href="/config/permissions">
+    Understand Towny's permission nodes and integrate with LuckPerms or Vault.
+  </Card>
+  <Card title="Developer API" icon="code" href="/api/overview">
+    Build add-on plugins using TownyAPI, custom events, and the metadata system.
+  </Card>
+</CardGroup>
+
+## What Towny provides
+
+Towny organises your server's players into a three-tier hierarchy and enforces land protection at every level:
+
+- **Residents** — every player who joins a Towny-enabled server is a Resident. They can join or found a Town, own Plots, and carry personal permission flags.
+- **Towns** — a group of Residents led by a Mayor. Towns claim chunks of land (TownBlocks), set taxes, build outposts, manage jails, and choose their own flag of alliance or neutrality.
+- **Nations** — coalitions of Towns led by a King. Nations set diplomacy (allies, enemies), levy taxes on member towns, and can declare neutrality.
+
+<CardGroup cols={2}>
+  <Card title="Residents" icon="user" href="/concepts/residents">
+    Player profiles, friend lists, personal permissions, and resident modes.
+  </Card>
+  <Card title="Towns" icon="city" href="/concepts/towns">
+    Land claiming, plot management, town banks, ranks, and toggles.
+  </Card>
+  <Card title="Nations" icon="flag" href="/concepts/nations">
+    Diplomacy, ally/enemy management, nation taxes, and nation zones.
+  </Card>
+  <Card title="Plots" icon="map" href="/concepts/plots">
+    Plot types (Shop, Embassy, Farm, Jail, etc.), plot groups, and permissions.
+  </Card>
+</CardGroup>
+
+## Supported platforms
+
+<Note>
+As of Towny **0.102.0.0**, only **Paper**, **Purpur**, and **Folia** are supported. Spigot and CraftBukkit are no longer compatible.
+</Note>
+
+| Minecraft Version | Recommended Towny Version |
+|---|---|
+| MC 1.21.x | 0.102.0.0 or latest pre-release |
+| MC 1.20.x | 0.102.0.0 or latest pre-release |
+| MC 1.19.x | 0.102.0.0 or latest pre-release |
+| MC 1.18.x | 0.100.3.0 |
+| MC 1.16.x – 1.17.x | 0.100.3.0 |
+
+## Economy & integrations
+
+Towny integrates with **Vault** (and compatible economy plugins) to power town and nation banks, plot purchase prices, taxes, upkeep, and spawn costs. Optional integrations include:
+
+- **PlaceholderAPI** — expose Towny data in scoreboards, chat, and other plugins
+- **LuckPerms / GroupManager** — use Towny rank contexts in permission assignments
+- **CoreProtect** — block-logging for claimed land events
+- **Dynmap-Towny** — render town and nation boundaries on a live map
+
+## Get help
+
+- Browse the [Command Reference](/commands/town) and [FAQ](/admin/faq) first
+- Join the [Discord server](https://discord.gg/gnpVs5m) for community support
+- File bugs or feature requests on [GitHub](https://github.com/TownyAdvanced/Towny/issues)
